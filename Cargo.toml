@@ -1,6 +1,12 @@
-[package]
-name = "patisson-api"
+[workspace]
+resolver = "2"
+members = ["microservices/auth"]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
+authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
-[dependencies]
+[workspace.dependencies]
+axum = "0.7.7"
+tokio = { version = "1.41.0", features = ["full"] }

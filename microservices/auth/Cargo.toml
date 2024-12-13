@@ -1,0 +1,9 @@
+[package]
+name = "auth"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+axum = { workspace = true }
+tokio = { workspace = true }
