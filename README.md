@@ -2,7 +2,21 @@
 
 A project for practical application of the knowledge gained independently and during the course [Rust Programming Specialization](https://www.coursera.org/specializations/rust-programming)
 
-## ToDo
+## Overview
+
+### Structure of the Project
+
+TODO:
+
+## Development
+
+### Setup
+
+1. After cloning the repo copy `env.sh.dist` to `env.sh`.
+2. Review `env.sh` and update for your system as needed.
+3. Run `docker compose up -d --build --remove-orphans`.
+
+### ToDo
 
 - [x] Relational database (PostgreSQL).
 - [x] Containerization (Docker).
