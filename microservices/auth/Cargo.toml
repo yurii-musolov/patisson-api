@@ -5,5 +5,11 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+anyhow = { workspace = true }
 axum = { workspace = true }
+clap = { workspace = true }
+sha2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
 tokio = { workspace = true }

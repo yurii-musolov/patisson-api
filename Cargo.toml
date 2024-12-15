@@ -8,5 +8,17 @@ edition = "2021"
 authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
 [workspace.dependencies]
+anyhow = "1.0.94"
 axum = "0.7.7"
+clap = { version = "4.5.23", features = ["derive"]}
 tokio = { version = "1.41.0", features = ["full"] }
+serde = { version = "1.0.213", features = ["derive"] }
+serde_json = "1.0.132"
+sha2 = "0.10.8"
+sqlx = { version = "0.8.2", features = [
+  "postgres",
+  "runtime-tokio",
+  "runtime-tokio-rustls",
+  "time",
+  "uuid",
+] }
