@@ -31,3 +31,7 @@ TODO:
 - [ ] DevOps practices (Automation, CI/CD).
 - [ ] Deployment on VPS.
 - [ ] Description, tables, UML-diagrams, API-documentation.
+
+## License
+
+This project is licensed under the [MIT license](LICENSE).
