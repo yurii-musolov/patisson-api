@@ -14,7 +14,7 @@ TODO:
 
 1. After cloning the repo copy `env.sh.dist` to `env.sh`.
 2. Review `env.sh` and update for your system as needed.
-3. Run `docker compose up -d --build --remove-orphans`.
+3. Run `make all`.
 
 ### ToDo
 
