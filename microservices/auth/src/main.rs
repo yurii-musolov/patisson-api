@@ -1,40 +1,55 @@
-mod config;
-mod router;
-mod cli;
 mod api;
+mod cli;
+mod config;
 mod handler;
+mod router;
 
-use anyhow;
 use clap::Parser;
 use cli::Command;
 use config::get_config;
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
+use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
-    let command = Command::parse();
-    println!("DEBUG (command): {command:?}");
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                format!("{}=debug,tower_http=debug", env!("CARGO_CRATE_NAME")).into()
+            }),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
 
-    let cfg = get_config();
+    match Command::parse() {
+        Command::Serve(params) => {
+            tracing::debug!("CLI command: {:?}", params);
 
-    let pool = PgPoolOptions::new()
-        .max_connections(cfg.db_max_connections)
-        .acquire_timeout(Duration::from_secs(3))
-        .connect(&cfg.db_url)
-        .await
-        .expect("can't connect to database");
+            let cfg = get_config(params);
 
-    sqlx::migrate!().run(&pool).await?;
+            let pool = PgPoolOptions::new()
+                .max_connections(cfg.db_max_connections)
+                .acquire_timeout(Duration::from_secs(3))
+                .connect(&cfg.db_url)
+                .await
+                .expect("can't connect to database");
 
-    let router = router::v1(pool);
+            sqlx::migrate!().run(&pool).await?;
 
-    let listener = tokio::net::TcpListener::bind(cfg.addr).await.unwrap();
+            let router = router::v1(pool).layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+            );
 
-    println!("Microservice `auth` running...");
-    println!("listening on {}", listener.local_addr().unwrap());
+            let listener = tokio::net::TcpListener::bind(cfg.address).await.unwrap();
 
-    axum::serve(listener, router).await.unwrap();
+            tracing::debug!("listening on {}", listener.local_addr().unwrap());
+
+            axum::serve(listener, router).await.unwrap();
+        }
+    }
 
     Ok(())
 }

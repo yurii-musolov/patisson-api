@@ -3,7 +3,7 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use sha2::{Digest, Sha256};
+use sha2::{digest::generic_array::functional::FunctionalSequence, Digest, Sha256};
 use sqlx::PgPool;
 
 use crate::api::{Identity, Pagination, Registration, User};
@@ -33,7 +33,7 @@ pub fn hash_sha256(str: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(str);
     let serial = hasher.finalize();
-    serial.into_iter().map(|n| format!("{n:02X}")).collect()
+    serial.fold(String::new(), |acc, n| format!("{acc}{n:02X}"))
 }
 
 pub fn internal_error<E>(err: E) -> (StatusCode, String)
@@ -110,7 +110,7 @@ pub async fn registration(
         Err(err) => {
             let reason = err.to_string();
             let pattern = "duplicate key value violates unique constraint";
-            let code = if reason.contains(&pattern) {
+            let code = if reason.contains(pattern) {
                 StatusCode::CONFLICT
             } else {
                 StatusCode::INTERNAL_SERVER_ERROR

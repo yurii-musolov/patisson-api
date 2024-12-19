@@ -20,6 +20,7 @@ TODO:
 
 - [x] Relational database (PostgreSQL).
 - [x] Containerization (Docker).
+- [x] Application-level tracing.
 - [ ] Time series database (Prometheus).
 - [ ] Monitoring system (Grafana).
 - [ ] Logging.
