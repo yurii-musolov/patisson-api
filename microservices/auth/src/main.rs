@@ -4,12 +4,16 @@ mod config;
 mod handler;
 mod router;
 
+use axum::http::{header::CONTENT_TYPE, HeaderValue};
 use clap::Parser;
 use cli::Command;
 use config::get_config;
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
-use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tower_http::{
+    cors::CorsLayer,
+    trace::{DefaultMakeSpan, TraceLayer},
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main(flavor = "current_thread")]
@@ -38,10 +42,16 @@ async fn main() -> anyhow::Result<()> {
 
             sqlx::migrate!().run(&pool).await?;
 
-            let router = router::v1(pool).layer(
-                TraceLayer::new_for_http()
-                    .make_span_with(DefaultMakeSpan::default().include_headers(true)),
-            );
+            let router = router::v1(pool)
+                .layer(
+                    TraceLayer::new_for_http()
+                        .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+                )
+                .layer(
+                    CorsLayer::new()
+                        .allow_origin("*".parse::<HeaderValue>().unwrap())
+                        .allow_headers([CONTENT_TYPE]),
+                );
 
             let listener = tokio::net::TcpListener::bind(cfg.address).await.unwrap();
 
