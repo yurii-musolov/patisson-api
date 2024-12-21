@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["microservices/*"]
+members = ["crates/*", "microservices/*"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
@@ -12,7 +12,7 @@ anyhow = "1.0.94"
 axum = "0.7.7"
 clap = { version = "4.5.23", features = ["derive"] }
 serde = { version = "1.0.213", features = ["derive"] }
-serde_json = "1.0.132"
+serde_json = "1.0.134"
 sha2 = "0.10.8"
 sqlx = { version = "0.8.2", features = [
   "postgres",
