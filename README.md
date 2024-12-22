@@ -21,6 +21,7 @@ TODO:
 - [x] Relational database (PostgreSQL).
 - [x] Containerization (Docker).
 - [x] Application-level tracing.
+- [x] Use CI/CD (GitHub Actions).
 - [ ] Time series database (Prometheus).
 - [ ] Monitoring system (Grafana).
 - [ ] Logging.
@@ -29,6 +30,7 @@ TODO:
 - [ ] In-memory database (Redis).
 - [ ] Scalable microservice (Service Discovery Patterns).
 - [ ] Real-time data analysis.
+- [ ] Use container registry in CI/DI (Docker Hub / GitHub Container registry).
 - [ ] DevOps practices (Automation, CI/CD).
 - [ ] Deployment on VPS.
 - [ ] Description, tables, UML-diagrams, API-documentation.
