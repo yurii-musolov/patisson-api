@@ -8,8 +8,8 @@ edition = "2021"
 authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
 [workspace.dependencies]
-anyhow = "1.0.94"
-axum = "0.7.7"
+anyhow = "1.0.95"
+axum = { version = "0.7.7", features = ["macros"] }
 clap = { version = "4.5.23", features = ["derive"] }
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.134"
