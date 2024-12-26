@@ -1,13 +1,14 @@
 [package]
-name = "provider"
+name = "bybit-sdk"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-axum.workspace = true
-clap.workspace = true
-reqwest.workspace = true
 serde.workspace = true
+reqwest.workspace = true
+serde-aux.workspace = true
 serde_json.workspace = true
+
+[dev-dependencies]
 tokio.workspace = true
