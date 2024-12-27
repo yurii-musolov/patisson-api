@@ -44,20 +44,20 @@ pub enum OrderStatus {
 impl OrderStatus {
     pub fn is_open_status(&self) -> bool {
         match self {
-            OrderStatus::New => true,
-            OrderStatus::PartiallyFilled => true,
-            OrderStatus::Untriggered => true,
+            Self::New => true,
+            Self::PartiallyFilled => true,
+            Self::Untriggered => true,
             _ => false,
         }
     }
     pub fn is_closed_status(&self) -> bool {
         match self {
-            OrderStatus::Rejected => true,
-            OrderStatus::PartiallyFilledCanceled => true,
-            OrderStatus::Filled => true,
-            OrderStatus::Cancelled => true,
-            OrderStatus::Triggered => true,
-            OrderStatus::Deactivated => true,
+            Self::Rejected => true,
+            Self::PartiallyFilledCanceled => true,
+            Self::Filled => true,
+            Self::Cancelled => true,
+            Self::Triggered => true,
+            Self::Deactivated => true,
             _ => false,
         }
     }
@@ -104,19 +104,19 @@ pub enum Interval {
 impl fmt::Display for Interval {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let value = match self {
-            Interval::Minute1 => "1",
-            Interval::Minute3 => "3",
-            Interval::Minute5 => "5",
-            Interval::Minute15 => "15",
-            Interval::Minute30 => "30",
-            Interval::Minute60 => "60",
-            Interval::Minute120 => "120",
-            Interval::Minute240 => "240",
-            Interval::Minute360 => "360",
-            Interval::Minute720 => "720",
-            Interval::Day => "D",
-            Interval::Week => "W",
-            Interval::Month => "M",
+            Self::Minute1 => "1",
+            Self::Minute3 => "3",
+            Self::Minute5 => "5",
+            Self::Minute15 => "15",
+            Self::Minute30 => "30",
+            Self::Minute60 => "60",
+            Self::Minute120 => "120",
+            Self::Minute240 => "240",
+            Self::Minute360 => "360",
+            Self::Minute720 => "720",
+            Self::Day => "D",
+            Self::Week => "W",
+            Self::Month => "M",
         };
         write!(f, "{value}")
     }
@@ -134,19 +134,19 @@ pub enum AccountType {
 impl AccountType {
     pub fn is_unified_trading_account(&self) -> bool {
         match self {
-            AccountType::CONTRACT => true,
-            AccountType::UNIFIED => true,
-            AccountType::FUND => true,
+            Self::CONTRACT => true,
+            Self::UNIFIED => true,
+            Self::FUND => true,
             _ => false,
         }
     }
     pub fn is_classic_account(&self) -> bool {
         match self {
-            AccountType::SPOT => true,
-            AccountType::CONTRACT => true,
-            AccountType::OPTION => true,
-            AccountType::FUND => true,
-            AccountType::INVESTMENT => true, // Deprecated.
+            Self::SPOT => true,
+            Self::CONTRACT => true,
+            Self::OPTION => true,
+            Self::FUND => true,
+            Self::INVESTMENT => true, // Deprecated.
             _ => false,
         }
     }

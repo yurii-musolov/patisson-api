@@ -1,4 +1,4 @@
-use crate::application::{Candle, Exchanger, Schema, Symbol};
+use crate::application::{Candle, Exchanger, GetCandlesParams, Schema, Symbol};
 
 #[derive(Debug, Clone)]
 pub struct BinanceExchange {}
@@ -10,10 +10,10 @@ impl BinanceExchange {
 }
 
 impl Exchanger for BinanceExchange {
-    async fn get_symbols(&self, schema: Schema) -> Vec<Symbol> {
+    async fn get_symbols(&self, _schema: Schema, _symbol: Option<String>) -> Vec<Symbol> {
         vec![]
     }
-    async fn get_candles(&self, schema: Schema, symbol: String) -> Vec<Candle> {
+    async fn get_candles(&self, _schema: Schema, _params: GetCandlesParams) -> Vec<Candle> {
         vec![]
     }
 }

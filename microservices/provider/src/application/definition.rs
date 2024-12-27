@@ -29,6 +29,23 @@ pub enum Side {
     Buy,
 }
 
+#[derive(Debug)]
+pub enum Interval {
+    Minute1,
+    Minute3,
+    Minute5,
+    Minute15,
+    Minute30,
+    Hour1,
+    Hour2,
+    Hour4,
+    Hour6,
+    Hour12,
+    Day1,
+    Week1,
+    Month1,
+}
+
 #[derive(Debug, Clone)]
 pub struct Candle {
     pub timestamp: Timestamp,
@@ -42,5 +59,10 @@ pub struct Candle {
 #[derive(Debug, Clone)]
 pub struct Symbol {
     pub symbol: String,
-    pub price: Price,
+    pub last_price: Price,
+    pub mark_price: Option<Price>,
+    pub index_price: Option<Price>,
+    pub bid_price: Price,
+    pub ask_price: Price,
+    pub volume24h: Volume,
 }

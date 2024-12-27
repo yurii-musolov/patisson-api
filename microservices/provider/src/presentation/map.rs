@@ -1,8 +1,7 @@
-use crate::application::{Candle, Exchange, Schema, Symbol};
+use super::{APICandle, APIExchange, APIInterval, APISchema, APISymbol};
+use crate::application::{Candle, Exchange, Interval, Schema, Symbol};
 
-use super::{APICandle, APIExchange, APISchema, APISymbol};
-
-pub fn from_api_exchange(v: APIExchange) -> Exchange {
+pub fn from_api_exchange(v: &APIExchange) -> Exchange {
     match v {
         APIExchange::Binance => Exchange::Binance,
         APIExchange::BingX => Exchange::BingX,
@@ -12,7 +11,7 @@ pub fn from_api_exchange(v: APIExchange) -> Exchange {
     }
 }
 
-pub fn from_api_schema(v: APISchema) -> Schema {
+pub fn from_api_schema(v: &APISchema) -> Schema {
     match v {
         APISchema::Futures => Schema::Futures,
         APISchema::FuturesCoin => Schema::FuturesCoin,
@@ -28,7 +27,12 @@ pub fn from_api_schema(v: APISchema) -> Schema {
 pub fn to_api_symbol(m: &Symbol) -> APISymbol {
     APISymbol {
         symbol: m.symbol.clone(),
-        price: m.price,
+        last_price: m.last_price,
+        mark_price: m.mark_price,
+        index_price: m.index_price,
+        bid_price: m.bid_price,
+        ask_price: m.ask_price,
+        volume24h: m.volume24h,
     }
 }
 
@@ -40,5 +44,23 @@ pub fn to_api_candle(m: &Candle) -> APICandle {
         open: m.open,
         low: m.low,
         size: m.size,
+    }
+}
+
+pub fn from_api_interval(v: &APIInterval) -> Interval {
+    match v {
+        APIInterval::Minute1 => Interval::Minute1,
+        APIInterval::Minute3 => Interval::Minute3,
+        APIInterval::Minute5 => Interval::Minute5,
+        APIInterval::Minute15 => Interval::Minute15,
+        APIInterval::Minute30 => Interval::Minute30,
+        APIInterval::Hour1 => Interval::Hour1,
+        APIInterval::Hour2 => Interval::Hour2,
+        APIInterval::Hour4 => Interval::Hour4,
+        APIInterval::Hour6 => Interval::Hour6,
+        APIInterval::Hour12 => Interval::Hour12,
+        APIInterval::Day1 => Interval::Day1,
+        APIInterval::Week1 => Interval::Week1,
+        APIInterval::Month1 => Interval::Month1,
     }
 }

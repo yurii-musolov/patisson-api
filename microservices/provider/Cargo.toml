@@ -6,6 +6,7 @@ authors.workspace = true
 
 [dependencies]
 axum.workspace = true
+bybit-sdk = { path = "../../crates/bybit-sdk" }
 clap.workspace = true
 reqwest.workspace = true
 serde.workspace = true

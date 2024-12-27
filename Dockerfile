@@ -12,5 +12,6 @@ CMD [ "serve" ]
 FROM debian:12.8-slim AS provider
 WORKDIR /app
 COPY --from=build /app/target/debug/provider ./
+RUN apt-get update -y && apt-get install -y ca-certificates
 ENTRYPOINT [ "./provider" ]
 CMD [ "serve", "--http" ]

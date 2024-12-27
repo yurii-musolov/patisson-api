@@ -30,7 +30,7 @@ async fn main() {
             let router = Router::new()
                 .route("/symbols/:exchange/:schema", get(get_symbols::<App>))
                 .route(
-                    "/candles/:exchange/:schema/:symbol",
+                    "/candles/:exchange/:schema/:symbol/:interval",
                     get(get_candles::<App>),
                 )
                 .with_state(application);

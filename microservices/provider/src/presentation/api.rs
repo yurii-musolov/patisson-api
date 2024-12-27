@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::application::{Price, Size, Timestamp};
+use crate::application::{Price, Size, Timestamp, Volume};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum APIExchange {
@@ -36,6 +36,29 @@ pub enum APISchema {
     Spot,
 }
 
+impl APISchema {
+    pub fn is_valid_with(&self, exchange: &APIExchange) -> bool {
+        match exchange {
+            APIExchange::Binance => match self {
+                Self::FuturesCoin => true,
+                Self::FuturesUSDT => true,
+                Self::Margin => true,
+                Self::Spot => true,
+                _ => false,
+            },
+            APIExchange::BingX => false,
+            APIExchange::Bybit => match self {
+                Self::Inverse => true,
+                Self::Linear => true,
+                Self::Spot => true,
+                _ => false,
+            },
+            APIExchange::Kraken => false,
+            APIExchange::MEXC => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum APISide {
     #[serde(rename = "sell")]
@@ -44,9 +67,66 @@ pub enum APISide {
     Buy,
 }
 
+#[derive(Debug, PartialEq, Deserialize)]
+pub enum APIInterval {
+    #[serde(rename = "1m")]
+    Minute1,
+    #[serde(rename = "3m")]
+    Minute3,
+    #[serde(rename = "5m")]
+    Minute5,
+    #[serde(rename = "15m")]
+    Minute15,
+    #[serde(rename = "30m")]
+    Minute30,
+    #[serde(rename = "1h")]
+    Hour1,
+    #[serde(rename = "2h")]
+    Hour2,
+    #[serde(rename = "4h")]
+    Hour4,
+    #[serde(rename = "6h")]
+    Hour6,
+    #[serde(rename = "12h")]
+    Hour12,
+    #[serde(rename = "1D")]
+    Day1,
+    #[serde(rename = "1W")]
+    Week1,
+    #[serde(rename = "1M")]
+    Month1,
+}
+
+impl APIInterval {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "1m" => Some(Self::Minute1),
+            "3m" => Some(Self::Minute3),
+            "5m" => Some(Self::Minute5),
+            "15m" => Some(Self::Minute15),
+            "30m" => Some(Self::Minute30),
+            "1h" => Some(Self::Hour1),
+            "2h" => Some(Self::Hour2),
+            "4h" => Some(Self::Hour4),
+            "6h" => Some(Self::Hour6),
+            "12h" => Some(Self::Hour12),
+            "1D" => Some(Self::Day1),
+            "1W" => Some(Self::Week1),
+            "1M" => Some(Self::Month1),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetCandlesQuery {
+    pub start: Option<u64>,
+    pub end: Option<u64>,
+    pub limit: Option<u64>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct APICandle {
-    #[serde(rename = "type")]
     pub timestamp: Timestamp,
     pub hight: Price,
     pub close: Price,
@@ -55,10 +135,20 @@ pub struct APICandle {
     pub size: Size,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct GetSymbolsQuery {
+    pub symbol: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct APISymbol {
     pub symbol: String,
-    pub price: Price,
+    pub last_price: Price,
+    pub mark_price: Option<Price>,
+    pub index_price: Option<Price>,
+    pub bid_price: Price,
+    pub ask_price: Price,
+    pub volume24h: Volume,
 }
 
 #[cfg(test)]
@@ -151,6 +241,54 @@ mod tests {
 
         cases.iter().for_each(|(value, expected)| {
             let deserialized: APISide = serde_json::from_str(value).unwrap();
+            assert_eq!(deserialized, *expected);
+        });
+    }
+
+    #[test]
+    fn deserialize_api_interval() {
+        let cases = vec![
+            ("\"1m\"", APIInterval::Minute1),
+            ("\"3m\"", APIInterval::Minute3),
+            ("\"5m\"", APIInterval::Minute5),
+            ("\"15m\"", APIInterval::Minute15),
+            ("\"30m\"", APIInterval::Minute30),
+            ("\"1h\"", APIInterval::Hour1),
+            ("\"2h\"", APIInterval::Hour2),
+            ("\"4h\"", APIInterval::Hour4),
+            ("\"6h\"", APIInterval::Hour6),
+            ("\"12h\"", APIInterval::Hour12),
+            ("\"1D\"", APIInterval::Day1),
+            ("\"1W\"", APIInterval::Week1),
+            ("\"1M\"", APIInterval::Month1),
+        ];
+
+        cases.iter().for_each(|(value, expected)| {
+            let deserialized: APIInterval = serde_json::from_str(value).unwrap();
+            assert_eq!(deserialized, *expected);
+        });
+    }
+
+    #[test]
+    fn deserialize_api_interval_from_str() {
+        let cases = vec![
+            ("1m", APIInterval::Minute1),
+            ("3m", APIInterval::Minute3),
+            ("5m", APIInterval::Minute5),
+            ("15m", APIInterval::Minute15),
+            ("30m", APIInterval::Minute30),
+            ("1h", APIInterval::Hour1),
+            ("2h", APIInterval::Hour2),
+            ("4h", APIInterval::Hour4),
+            ("6h", APIInterval::Hour6),
+            ("12h", APIInterval::Hour12),
+            ("1D", APIInterval::Day1),
+            ("1W", APIInterval::Week1),
+            ("1M", APIInterval::Month1),
+        ];
+
+        cases.iter().for_each(|(value, expected)| {
+            let deserialized: APIInterval = APIInterval::from_str(value).unwrap();
             assert_eq!(deserialized, *expected);
         });
     }

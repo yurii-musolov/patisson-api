@@ -1,15 +1,25 @@
 use std::sync::Arc;
 
-use super::{Candle, Exchange, Schema, Symbol};
+use super::{Candle, Exchange, Interval, Schema, Symbol};
 
 pub trait Exchanger: Send + Sync {
-    async fn get_symbols(&self, schema: Schema) -> Vec<Symbol>;
-    async fn get_candles(&self, schema: Schema, symbol: String) -> Vec<Candle>;
+    async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol>;
+    async fn get_candles(&self, schema: Schema, params: GetCandlesParams) -> Vec<Candle>;
 }
 
 pub trait IApp: Send + Sync {
-    async fn get_symbols(&self, exchange: Exchange, schema: Schema) -> Vec<Symbol>;
-    async fn get_candles(&self, exchange: Exchange, schema: Schema, symbol: String) -> Vec<Candle>;
+    async fn get_symbols(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        symbol: Option<String>,
+    ) -> Vec<Symbol>;
+    async fn get_candles(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        params: GetCandlesParams,
+    ) -> Vec<Candle>;
 }
 
 #[derive(Debug, Clone)]
@@ -55,22 +65,40 @@ where
     E4: Exchanger,
     E5: Exchanger,
 {
-    async fn get_symbols(&self, exchange: Exchange, schema: Schema) -> Vec<Symbol> {
+    async fn get_symbols(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        symbol: Option<String>,
+    ) -> Vec<Symbol> {
         match exchange {
-            Exchange::Binance => self.binance.get_symbols(schema).await,
-            Exchange::BingX => self.bingx.get_symbols(schema).await,
-            Exchange::Bybit => self.bybit.get_symbols(schema).await,
-            Exchange::Kraken => self.kraken.get_symbols(schema).await,
-            Exchange::MEXC => self.mexc.get_symbols(schema).await,
+            Exchange::Binance => self.binance.get_symbols(schema, symbol).await,
+            Exchange::BingX => self.bingx.get_symbols(schema, symbol).await,
+            Exchange::Bybit => self.bybit.get_symbols(schema, symbol).await,
+            Exchange::Kraken => self.kraken.get_symbols(schema, symbol).await,
+            Exchange::MEXC => self.mexc.get_symbols(schema, symbol).await,
         }
     }
-    async fn get_candles(&self, exchange: Exchange, schema: Schema, symbol: String) -> Vec<Candle> {
+    async fn get_candles(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        params: GetCandlesParams,
+    ) -> Vec<Candle> {
         match exchange {
-            Exchange::Binance => self.binance.get_candles(schema, symbol).await,
-            Exchange::BingX => self.bingx.get_candles(schema, symbol).await,
-            Exchange::Bybit => self.bybit.get_candles(schema, symbol).await,
-            Exchange::Kraken => self.kraken.get_candles(schema, symbol).await,
-            Exchange::MEXC => self.mexc.get_candles(schema, symbol).await,
+            Exchange::Binance => self.binance.get_candles(schema, params).await,
+            Exchange::BingX => self.bingx.get_candles(schema, params).await,
+            Exchange::Bybit => self.bybit.get_candles(schema, params).await,
+            Exchange::Kraken => self.kraken.get_candles(schema, params).await,
+            Exchange::MEXC => self.mexc.get_candles(schema, params).await,
         }
     }
+}
+
+pub struct GetCandlesParams {
+    pub symbol: String,
+    pub interval: Interval,
+    pub start: Option<u64>,
+    pub end: Option<u64>,
+    pub limit: Option<u64>,
 }
