@@ -10,10 +10,10 @@ impl KrakenExchange {
 }
 
 impl Exchanger for KrakenExchange {
-    async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol> {
+    async fn get_symbols(&self, _schema: Schema, _symbol: Option<String>) -> Vec<Symbol> {
         vec![]
     }
-    async fn get_candles(&self, schema: Schema, params: GetCandlesParams) -> Vec<Candle> {
+    async fn get_candles(&self, _schema: Schema, _params: GetCandlesParams) -> Vec<Candle> {
         vec![]
     }
 }

@@ -13,11 +13,11 @@ pub fn beam_scales(left: f64, right: f64) -> f64 {
     };
 
     let half = (left + right) / 2.0;
-    return if left > right {
+    if left > right {
         (half - left) / half
     } else {
         (right - half) / half
-    };
+    }
 }
 
 #[cfg(test)]

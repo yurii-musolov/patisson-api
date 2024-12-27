@@ -43,23 +43,18 @@ pub enum OrderStatus {
 
 impl OrderStatus {
     pub fn is_open_status(&self) -> bool {
-        match self {
-            Self::New => true,
-            Self::PartiallyFilled => true,
-            Self::Untriggered => true,
-            _ => false,
-        }
+        matches!(self, Self::New | Self::PartiallyFilled | Self::Untriggered)
     }
     pub fn is_closed_status(&self) -> bool {
-        match self {
-            Self::Rejected => true,
-            Self::PartiallyFilledCanceled => true,
-            Self::Filled => true,
-            Self::Cancelled => true,
-            Self::Triggered => true,
-            Self::Deactivated => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::Rejected
+                | Self::PartiallyFilledCanceled
+                | Self::Filled
+                | Self::Cancelled
+                | Self::Triggered
+                | Self::Deactivated
+        )
     }
 }
 
@@ -133,21 +128,12 @@ pub enum AccountType {
 
 impl AccountType {
     pub fn is_unified_trading_account(&self) -> bool {
-        match self {
-            Self::CONTRACT => true,
-            Self::UNIFIED => true,
-            Self::FUND => true,
-            _ => false,
-        }
+        matches!(self, Self::CONTRACT | Self::UNIFIED | Self::FUND)
     }
     pub fn is_classic_account(&self) -> bool {
-        match self {
-            Self::SPOT => true,
-            Self::CONTRACT => true,
-            Self::OPTION => true,
-            Self::FUND => true,
-            Self::INVESTMENT => true, // Deprecated.
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::SPOT | Self::CONTRACT | Self::OPTION | Self::FUND | Self::INVESTMENT
+        )
     }
 }

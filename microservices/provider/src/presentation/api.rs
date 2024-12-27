@@ -13,7 +13,7 @@ pub enum APIExchange {
     #[serde(rename = "kraken")]
     Kraken,
     #[serde(rename = "mexc")]
-    MEXC,
+    Mexc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -39,22 +39,14 @@ pub enum APISchema {
 impl APISchema {
     pub fn is_valid_with(&self, exchange: &APIExchange) -> bool {
         match exchange {
-            APIExchange::Binance => match self {
-                Self::FuturesCoin => true,
-                Self::FuturesUSDT => true,
-                Self::Margin => true,
-                Self::Spot => true,
-                _ => false,
-            },
+            APIExchange::Binance => matches!(
+                self,
+                Self::FuturesCoin | Self::FuturesUSDT | Self::Margin | Self::Spot
+            ),
             APIExchange::BingX => false,
-            APIExchange::Bybit => match self {
-                Self::Inverse => true,
-                Self::Linear => true,
-                Self::Spot => true,
-                _ => false,
-            },
+            APIExchange::Bybit => matches!(self, Self::Inverse | Self::Linear | Self::Spot),
             APIExchange::Kraken => false,
-            APIExchange::MEXC => false,
+            APIExchange::Mexc => false,
         }
     }
 }
@@ -162,7 +154,7 @@ mod tests {
             (APIExchange::BingX, "\"bingx\""),
             (APIExchange::Bybit, "\"bybit\""),
             (APIExchange::Kraken, "\"kraken\""),
-            (APIExchange::MEXC, "\"mexc\""),
+            (APIExchange::Mexc, "\"mexc\""),
         ];
 
         cases.iter().for_each(|(value, expected)| {
@@ -178,7 +170,7 @@ mod tests {
             ("\"bingx\"", APIExchange::BingX),
             ("\"bybit\"", APIExchange::Bybit),
             ("\"kraken\"", APIExchange::Kraken),
-            ("\"mexc\"", APIExchange::MEXC),
+            ("\"mexc\"", APIExchange::Mexc),
         ];
 
         cases.iter().for_each(|(value, expected)| {

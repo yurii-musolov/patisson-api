@@ -1,5 +1,5 @@
-mod application;
-mod definition;
+mod app;
+mod def;
 
-pub use application::*;
-pub use definition::*;
+pub use app::*;
+pub use def::*;

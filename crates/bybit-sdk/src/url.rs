@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 // Mainnet.
 pub const URL_BASE_API_MAINNET_1: &str = "https://api.bybit.com";
 pub const URL_BASE_API_MAINNET_2: &str = "https://api.bytick.com";
@@ -18,8 +20,8 @@ pub const URL_BASE_STREAM_DEMO_TRADING: &str = "wss://stream-demo.bybit.com";
 pub const HEADER_X_BAPI_API_KEY: &str = "X-BAPI-API-KEY"; // API key.
 pub const HEADER_X_BAPI_TIMESTAMP: &str = "X-BAPI-TIMESTAMP"; // UTC timestamp in milliseconds.
 pub const HEADER_X_BAPI_SIGN: &str = "X-BAPI-SIGN"; // A signature derived from the request's parameters.
-pub const HEADER_X_Referer: &str = "X-Referer"; // The header for broker users only.
-pub const HEADER_Referer: &str = "Referer"; // The header for broker users only.
+pub const HEADER_X_REFERER: &str = "X-Referer"; // The header for broker users only.
+pub const HEADER_REFERER: &str = "Referer"; // The header for broker users only.
 
 // Candlestick, orderbook, ticker, platform transaction data, underlying financial rules, risk control rules
 pub const PATH_MARKET_KLINE: &str = "/v5/market/kline";

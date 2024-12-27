@@ -9,7 +9,7 @@ pub enum Exchange {
     BingX,
     Bybit,
     Kraken,
-    MEXC,
+    Mexc,
 }
 #[derive(Debug, Clone)]
 pub enum Schema {

@@ -76,7 +76,7 @@ where
             Exchange::BingX => self.bingx.get_symbols(schema, symbol).await,
             Exchange::Bybit => self.bybit.get_symbols(schema, symbol).await,
             Exchange::Kraken => self.kraken.get_symbols(schema, symbol).await,
-            Exchange::MEXC => self.mexc.get_symbols(schema, symbol).await,
+            Exchange::Mexc => self.mexc.get_symbols(schema, symbol).await,
         }
     }
     async fn get_candles(
@@ -90,7 +90,7 @@ where
             Exchange::BingX => self.bingx.get_candles(schema, params).await,
             Exchange::Bybit => self.bybit.get_candles(schema, params).await,
             Exchange::Kraken => self.kraken.get_candles(schema, params).await,
-            Exchange::MEXC => self.mexc.get_candles(schema, params).await,
+            Exchange::Mexc => self.mexc.get_candles(schema, params).await,
         }
     }
 }

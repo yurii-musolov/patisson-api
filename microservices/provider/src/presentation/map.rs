@@ -7,7 +7,7 @@ pub fn from_api_exchange(v: &APIExchange) -> Exchange {
         APIExchange::BingX => Exchange::BingX,
         APIExchange::Bybit => Exchange::Bybit,
         APIExchange::Kraken => Exchange::Kraken,
-        APIExchange::MEXC => Exchange::MEXC,
+        APIExchange::Mexc => Exchange::Mexc,
     }
 }
 
