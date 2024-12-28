@@ -41,8 +41,8 @@ impl Exchanger for BybitExchange {
                 Ticker::Option { list } => list.iter().map(from_option_ticker).collect(),
                 Ticker::Spot { list } => list.iter().map(from_spot_ticker).collect(),
             },
-            Err(e) => {
-                println!("{e}");
+            Err(err) => {
+                tracing::error!("{err:?}");
                 vec![]
             }
         }
@@ -69,8 +69,8 @@ impl Exchanger for BybitExchange {
                 KLine::Option { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
                 KLine::Spot { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
             },
-            Err(e) => {
-                println!("{e}");
+            Err(err) => {
+                tracing::error!("{err:?}");
                 vec![]
             }
         }
@@ -102,8 +102,8 @@ impl Exchanger for BybitExchange {
                     list.iter().map(from_inverse_linear_spot_trade).collect()
                 }
             },
-            Err(e) => {
-                println!("{e}");
+            Err(err) => {
+                tracing::error!("{err:?}");
                 vec![]
             }
         }
