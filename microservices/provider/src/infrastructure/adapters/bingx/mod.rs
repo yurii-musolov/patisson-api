@@ -2,7 +2,7 @@ use crate::application::{
     Candle, Exchanger, GetCandlesParams, GetTradesParams, Schema, Symbol, Trade,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct BingXExchange {}
 
 impl BingXExchange {

@@ -3,7 +3,7 @@ pub type Size = f64;
 pub type Timestamp = u64; // milliseconds.
 pub type Volume = f64;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Exchange {
     Binance,
     BingX,
@@ -11,7 +11,7 @@ pub enum Exchange {
     Kraken,
     Mexc,
 }
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Schema {
     Futures,
     FuturesCoin,
@@ -23,13 +23,12 @@ pub enum Schema {
     Spot,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Side {
     Buy,
     Sell,
 }
 
-#[derive(Debug)]
 pub enum Interval {
     Minute1,
     Minute3,
@@ -46,7 +45,7 @@ pub enum Interval {
     Month1,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Candle {
     pub time: Timestamp,
     pub hight: Price,
@@ -56,7 +55,7 @@ pub struct Candle {
     pub size: Size,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Symbol {
     pub symbol: String,
     pub last_price: Price,
@@ -67,7 +66,7 @@ pub struct Symbol {
     pub volume24h: Volume,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Trade {
     pub symbol: String,
     pub price: Price,

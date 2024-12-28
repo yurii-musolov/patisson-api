@@ -1,6 +1,6 @@
 use clap::Parser;
 
-#[derive(Debug, Parser)]
+#[derive(Parser)]
 #[clap(about = "Microservice `provider`")]
 #[command(version, about)]
 pub enum Command {

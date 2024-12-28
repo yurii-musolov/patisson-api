@@ -29,7 +29,7 @@ pub trait IApp: Send + Sync {
     ) -> Vec<Trade>;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Application<E1, E2, E3, E4, E5>
 where
     E1: Exchanger,

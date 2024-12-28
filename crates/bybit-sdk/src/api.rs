@@ -18,7 +18,7 @@ pub struct Response<T> {
 #[derive(Debug, Deserialize)]
 pub struct RetExtInfo {}
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct GetKLinesParams {
     pub category: Category,
     pub symbol: String,
@@ -59,7 +59,7 @@ pub struct KLineRow {
     pub turnover: f64, // Turnover. Unit of figure: quantity of quota coin
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct GetTickersParams {
     pub category: Category,
     pub symbol: Option<String>,
@@ -223,7 +223,7 @@ pub struct SpotTicker {
     pub usd_index_price: f64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct GetTradesParams {
     pub category: Category,
     // required for spot/linear/inverse

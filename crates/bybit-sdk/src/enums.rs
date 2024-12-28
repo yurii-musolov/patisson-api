@@ -3,7 +3,7 @@ use std::fmt;
 
 // Unified Account: spot | linear | inverse | option
 // Classic Account: linear | inverse | spot
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum Category {
     #[serde(rename = "inverse")]
     Inverse, // Inverse contract, including Inverse perp, Inverse futures.
@@ -58,7 +58,7 @@ impl OrderStatus {
     }
 }
 
-#[derive(PartialEq, Deserialize, Debug)]
+#[derive(PartialEq, Deserialize)]
 pub enum TickDirection {
     PlusTick,      // price rise
     ZeroPlusTick, // trade occurs at the same price as the previous trade, which occurred at a price higher than that for the trade preceding it
@@ -66,7 +66,7 @@ pub enum TickDirection {
     ZeroMinusTick, // trade occurs at the same price as the previous trade, which occurred at a price lower than that for the trade preceding it
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum Interval {
     #[serde(rename = "1")]
     Minute1,

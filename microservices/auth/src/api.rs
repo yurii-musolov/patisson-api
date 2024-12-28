@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
     pub username: String,
     pub password_hash: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Registration {
     pub username: String,
     pub password: String,
@@ -16,7 +16,7 @@ pub struct Registration {
 pub const DEFAULT_OFFSET: i64 = 0;
 pub const DEFAULT_LIMIT: i64 = 10;
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct Pagination {
     pub offset: Option<i64>,
     pub limit: Option<i64>,
@@ -31,7 +31,7 @@ impl Pagination {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize)]
 pub struct Identity {
     pub id: i64,
 }

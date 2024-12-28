@@ -110,14 +110,14 @@ impl APIInterval {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct GetCandlesQuery {
     pub start: Option<u64>,
     pub end: Option<u64>,
     pub limit: Option<u64>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Clone, Serialize)]
 pub struct APICandle {
     pub time: Timestamp,
     pub hight: Price,
@@ -127,12 +127,12 @@ pub struct APICandle {
     pub size: Size,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct GetSymbolsQuery {
     pub symbol: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Clone, Serialize)]
 pub struct APISymbol {
     pub symbol: String,
     pub last_price: Price,
@@ -143,12 +143,12 @@ pub struct APISymbol {
     pub volume24h: Volume,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Deserialize)]
 pub struct GetTradesQuery {
     pub limit: Option<u64>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Clone, Serialize)]
 pub struct APITrade {
     pub symbol: String,
     pub price: Price,

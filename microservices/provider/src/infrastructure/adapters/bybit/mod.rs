@@ -12,7 +12,7 @@ use map::{
     from_option_trade, from_spot_ticker, to_category, to_interval,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct BybitExchange<'a> {
     client: Client<'a>,
 }
