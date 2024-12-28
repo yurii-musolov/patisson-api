@@ -40,7 +40,7 @@ pub fn internal_error<E>(err: E) -> (StatusCode, String)
 where
     E: std::error::Error,
 {
-    println!("DEBUG (default error handler): {:?}", err);
+    tracing::error!("{err:?}");
 
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
@@ -86,7 +86,7 @@ pub async fn get_user_by_id(
         }) {
         Ok(user) => Ok(Json(user)),
         Err(err) => {
-            println!("DEBUG (get_user_by_id error): {:?}", err);
+            tracing::error!("{err:?}");
             Err(StatusCode::NOT_FOUND)
         }
     }
@@ -103,7 +103,6 @@ pub async fn registration(
         .await
     {
         Ok(row) => {
-            println!("DEBUG (row): {row:?}");
             // TODO: StatusCode::CREATED
             Ok(Json(Identity { id: row.id }))
         }
