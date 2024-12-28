@@ -119,7 +119,7 @@ pub struct GetCandlesQuery {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct APICandle {
-    pub timestamp: Timestamp,
+    pub time: Timestamp,
     pub hight: Price,
     pub close: Price,
     pub open: Price,
@@ -154,7 +154,7 @@ pub struct APITrade {
     pub price: Price,
     pub size: Volume,
     pub side: APISide,
-    pub timestamp: Timestamp,
+    pub time: Timestamp,
 }
 
 #[cfg(test)]

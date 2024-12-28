@@ -48,7 +48,7 @@ pub enum Interval {
 
 #[derive(Debug, Clone)]
 pub struct Candle {
-    pub timestamp: Timestamp,
+    pub time: Timestamp,
     pub hight: Price,
     pub close: Price,
     pub open: Price,
@@ -73,5 +73,5 @@ pub struct Trade {
     pub price: Price,
     pub size: Volume,
     pub side: Side,
-    pub timestamp: Timestamp,
+    pub time: Timestamp,
 }

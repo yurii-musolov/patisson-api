@@ -38,7 +38,7 @@ pub fn to_api_symbol(m: &Symbol) -> APISymbol {
 
 pub fn to_api_candle(m: &Candle) -> APICandle {
     APICandle {
-        timestamp: m.timestamp,
+        time: m.time,
         hight: m.hight,
         close: m.close,
         open: m.open,
@@ -60,7 +60,7 @@ pub fn to_api_trade(m: &Trade) -> APITrade {
         price: m.price,
         size: m.size,
         side: to_api_side(&m.side),
-        timestamp: m.timestamp,
+        time: m.time,
     }
 }
 

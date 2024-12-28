@@ -43,7 +43,7 @@ pub fn from_spot_ticker(v: &SpotTicker) -> Symbol {
 
 pub fn from_kline_row(v: &KLineRow) -> Candle {
     Candle {
-        timestamp: v.start_time,
+        time: v.start_time,
         hight: v.high_price,
         close: v.close_price,
         open: v.open_price,
@@ -58,7 +58,7 @@ pub fn from_inverse_linear_spot_trade(v: &InverseLinearSpotTrade) -> Trade {
         price: v.price,
         size: v.size,
         side: from_side(&v.side),
-        timestamp: v.time,
+        time: v.time,
     }
 }
 
@@ -68,7 +68,7 @@ pub fn from_option_trade(v: &OptionTrade) -> Trade {
         price: v.price,
         size: v.size,
         side: from_side(&v.side),
-        timestamp: v.time,
+        time: v.time,
     }
 }
 
