@@ -3,9 +3,16 @@ mod infrastructure;
 mod presentation;
 
 use application::Application;
-use axum::{routing::get, Router};
+use axum::{
+    http::{header::CONTENT_TYPE, HeaderValue},
+    routing::get,
+    Router,
+};
 use clap::Parser;
-use tower_http::trace::{DefaultMakeSpan, TraceLayer};
+use tower_http::{
+    cors::CorsLayer,
+    trace::{DefaultMakeSpan, TraceLayer},
+};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
@@ -49,6 +56,11 @@ async fn main() {
                 .layer(
                     TraceLayer::new_for_http()
                         .make_span_with(DefaultMakeSpan::default().include_headers(true)),
+                )
+                .layer(
+                    CorsLayer::new()
+                        .allow_origin("*".parse::<HeaderValue>().unwrap())
+                        .allow_headers([CONTENT_TYPE]),
                 )
                 .with_state(application);
 
