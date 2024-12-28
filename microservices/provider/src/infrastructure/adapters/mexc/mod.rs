@@ -1,4 +1,6 @@
-use crate::application::{Candle, Exchanger, GetCandlesParams, Schema, Symbol};
+use crate::application::{
+    Candle, Exchanger, GetCandlesParams, GetTradesParams, Schema, Symbol, Trade,
+};
 
 #[derive(Debug, Clone)]
 pub struct MEXCExchange {}
@@ -14,6 +16,10 @@ impl Exchanger for MEXCExchange {
         vec![]
     }
     async fn get_candles(&self, _schema: Schema, _params: GetCandlesParams) -> Vec<Candle> {
+        vec![]
+    }
+
+    async fn get_trades(&self, _schema: Schema, _sparams: GetTradesParams) -> Vec<Trade> {
         vec![]
     }
 }

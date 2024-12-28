@@ -1,5 +1,5 @@
-use super::{APICandle, APIExchange, APIInterval, APISchema, APISymbol};
-use crate::application::{Candle, Exchange, Interval, Schema, Symbol};
+use super::{APICandle, APIExchange, APIInterval, APISchema, APISide, APISymbol, APITrade};
+use crate::application::{Candle, Exchange, Interval, Schema, Side, Symbol, Trade};
 
 pub fn from_api_exchange(v: &APIExchange) -> Exchange {
     match v {
@@ -44,6 +44,23 @@ pub fn to_api_candle(m: &Candle) -> APICandle {
         open: m.open,
         low: m.low,
         size: m.size,
+    }
+}
+
+pub fn to_api_side(m: &Side) -> APISide {
+    match m {
+        Side::Buy => APISide::Buy,
+        Side::Sell => APISide::Sell,
+    }
+}
+
+pub fn to_api_trade(m: &Trade) -> APITrade {
+    APITrade {
+        symbol: m.symbol.clone(),
+        price: m.price,
+        size: m.size,
+        side: to_api_side(&m.side),
+        timestamp: m.timestamp,
     }
 }
 

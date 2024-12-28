@@ -1,6 +1,9 @@
-use bybit_sdk::{self, Category, KLineRow, LinearInverseTicker, OptionTicker, SpotTicker};
+use bybit_sdk::{
+    self, Category, InverseLinearSpotTrade, KLineRow, LinearInverseTicker, OptionTicker,
+    OptionTrade, Side as BybitSide, SpotTicker,
+};
 
-use crate::application::{Candle, Interval, Schema, Symbol};
+use crate::application::{Candle, Interval, Schema, Side, Symbol, Trade};
 
 pub fn from_linear_inverse_ticker(v: &LinearInverseTicker) -> Symbol {
     Symbol {
@@ -46,6 +49,33 @@ pub fn from_kline_row(v: &KLineRow) -> Candle {
         open: v.open_price,
         low: v.low_price,
         size: v.volume,
+    }
+}
+
+pub fn from_inverse_linear_spot_trade(v: &InverseLinearSpotTrade) -> Trade {
+    Trade {
+        symbol: v.symbol.clone(),
+        price: v.price,
+        size: v.size,
+        side: from_side(&v.side),
+        timestamp: v.time,
+    }
+}
+
+pub fn from_option_trade(v: &OptionTrade) -> Trade {
+    Trade {
+        symbol: v.symbol.clone(),
+        price: v.price,
+        size: v.size,
+        side: from_side(&v.side),
+        timestamp: v.time,
+    }
+}
+
+pub fn from_side(v: &BybitSide) -> Side {
+    match v {
+        BybitSide::Buy => Side::Buy,
+        BybitSide::Sell => Side::Sell,
     }
 }
 

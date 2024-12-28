@@ -6,7 +6,7 @@ use application::Application;
 use axum::{routing::get, Router};
 use clap::Parser;
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
-use presentation::{get_candles, get_config, get_symbols, Command};
+use presentation::{get_candles, get_config, get_symbols, get_trades, Command};
 
 type App = Application<BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange>;
 
@@ -33,6 +33,7 @@ async fn main() {
                     "/candles/:exchange/:schema/:symbol/:interval",
                     get(get_candles::<App>),
                 )
+                .route("/trades/:exchange/:schema/:symbol", get(get_trades::<App>))
                 .with_state(application);
 
             let listener = tokio::net::TcpListener::bind(cfg.http_address)

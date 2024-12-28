@@ -143,6 +143,20 @@ pub struct APISymbol {
     pub volume24h: Volume,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct GetTradesQuery {
+    pub limit: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct APITrade {
+    pub symbol: String,
+    pub price: Price,
+    pub size: Volume,
+    pub side: APISide,
+    pub timestamp: Timestamp,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -25,8 +25,8 @@ pub enum Schema {
 
 #[derive(Debug, Clone)]
 pub enum Side {
-    Sell,
     Buy,
+    Sell,
 }
 
 #[derive(Debug)]
@@ -65,4 +65,13 @@ pub struct Symbol {
     pub bid_price: Price,
     pub ask_price: Price,
     pub volume24h: Volume,
+}
+
+#[derive(Debug, Clone)]
+pub struct Trade {
+    pub symbol: String,
+    pub price: Price,
+    pub size: Volume,
+    pub side: Side,
+    pub timestamp: Timestamp,
 }

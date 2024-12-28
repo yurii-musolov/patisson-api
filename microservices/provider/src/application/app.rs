@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
-use super::{Candle, Exchange, Interval, Schema, Symbol};
+use super::{Candle, Exchange, Interval, Schema, Symbol, Trade};
 
 pub trait Exchanger: Send + Sync {
     async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol>;
     async fn get_candles(&self, schema: Schema, params: GetCandlesParams) -> Vec<Candle>;
+    async fn get_trades(&self, schema: Schema, params: GetTradesParams) -> Vec<Trade>;
 }
 
 pub trait IApp: Send + Sync {
@@ -20,6 +21,12 @@ pub trait IApp: Send + Sync {
         schema: Schema,
         params: GetCandlesParams,
     ) -> Vec<Candle>;
+    async fn get_trades(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        params: GetTradesParams,
+    ) -> Vec<Trade>;
 }
 
 #[derive(Debug, Clone)]
@@ -93,6 +100,21 @@ where
             Exchange::Mexc => self.mexc.get_candles(schema, params).await,
         }
     }
+
+    async fn get_trades(
+        &self,
+        exchange: Exchange,
+        schema: Schema,
+        params: GetTradesParams,
+    ) -> Vec<Trade> {
+        match exchange {
+            Exchange::Binance => self.binance.get_trades(schema, params).await,
+            Exchange::BingX => self.bingx.get_trades(schema, params).await,
+            Exchange::Bybit => self.bybit.get_trades(schema, params).await,
+            Exchange::Kraken => self.kraken.get_trades(schema, params).await,
+            Exchange::Mexc => self.mexc.get_trades(schema, params).await,
+        }
+    }
 }
 
 pub struct GetCandlesParams {
@@ -100,5 +122,10 @@ pub struct GetCandlesParams {
     pub interval: Interval,
     pub start: Option<u64>,
     pub end: Option<u64>,
+    pub limit: Option<u64>,
+}
+
+pub struct GetTradesParams {
+    pub symbol: String,
     pub limit: Option<u64>,
 }

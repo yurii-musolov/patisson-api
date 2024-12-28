@@ -5,11 +5,11 @@ use axum::{
 };
 
 use crate::{
-    application::{GetCandlesParams, IApp},
+    application::{GetCandlesParams, GetTradesParams, IApp},
     presentation::{
         from_api_exchange, from_api_interval, from_api_schema, to_api_candle, to_api_symbol,
-        APICandle, APIExchange, APIInterval, APISchema, APISymbol, GetCandlesQuery,
-        GetSymbolsQuery,
+        to_api_trade, APICandle, APIExchange, APIInterval, APISchema, APISymbol, APITrade,
+        GetCandlesQuery, GetSymbolsQuery, GetTradesQuery,
     },
 };
 
@@ -63,5 +63,31 @@ where
         )
         .await;
     let candles = candles.iter().map(to_api_candle).collect();
+    Ok(Json(candles))
+}
+
+pub async fn get_trades<T>(
+    Path((exchange, schema, symbol)): Path<(APIExchange, APISchema, String)>,
+    Query(query): Query<GetTradesQuery>,
+    State(application): State<T>,
+) -> Result<Json<Vec<APITrade>>, StatusCode>
+where
+    T: IApp,
+{
+    if !schema.is_valid_with(&exchange) {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    let candles = application
+        .get_trades(
+            from_api_exchange(&exchange),
+            from_api_schema(&schema),
+            GetTradesParams {
+                symbol,
+                limit: query.limit,
+            },
+        )
+        .await;
+    let candles = candles.iter().map(to_api_trade).collect();
     Ok(Json(candles))
 }

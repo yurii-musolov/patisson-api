@@ -1,12 +1,15 @@
 mod map;
 
-use crate::application::{Candle, Exchanger, GetCandlesParams, Schema, Symbol};
+use crate::application::{
+    Candle, Exchanger, GetCandlesParams, GetTradesParams, Schema, Symbol, Trade,
+};
 use bybit_sdk::{
-    self, Client, GetKLinesParams, GetTickersParams, KLine, Ticker, URL_BASE_API_MAINNET_1,
+    self, Client, GetKLinesParams, GetTickersParams, GetTradesParams as BybitGetTradesParams,
+    KLine, Ticker, Trade as BybitTrade, URL_BASE_API_MAINNET_1,
 };
 use map::{
-    from_kline_row, from_linear_inverse_ticker, from_option_ticker, from_spot_ticker, to_category,
-    to_interval,
+    from_inverse_linear_spot_trade, from_kline_row, from_linear_inverse_ticker, from_option_ticker,
+    from_option_trade, from_spot_ticker, to_category, to_interval,
 };
 
 #[derive(Debug, Clone)]
@@ -38,7 +41,8 @@ impl Exchanger for BybitExchange {
                 Ticker::Option { list } => list.iter().map(from_option_ticker).collect(),
                 Ticker::Spot { list } => list.iter().map(from_spot_ticker).collect(),
             },
-            Err(_) => {
+            Err(e) => {
+                println!("{e}");
                 vec![]
             }
         }
@@ -65,7 +69,41 @@ impl Exchanger for BybitExchange {
                 KLine::Option { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
                 KLine::Spot { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
             },
-            Err(_) => {
+            Err(e) => {
+                println!("{e}");
+                vec![]
+            }
+        }
+    }
+
+    async fn get_trades(&self, schema: Schema, params: GetTradesParams) -> Vec<Trade> {
+        // TODO: make Client outside.
+        let client = Client::new(URL_BASE_API_MAINNET_1);
+        let result = client
+            .get_public_recent_trading_history(BybitGetTradesParams {
+                category: to_category(&schema),
+                symbol: Some(params.symbol),
+                base_coin: None,
+                option_type: None,
+                limit: params.limit,
+            })
+            .await;
+
+        match result {
+            Ok(response) => match response.result {
+                BybitTrade::Inverse { list } => {
+                    list.iter().map(from_inverse_linear_spot_trade).collect()
+                }
+                BybitTrade::Linear { list } => {
+                    list.iter().map(from_inverse_linear_spot_trade).collect()
+                }
+                BybitTrade::Option { list } => list.iter().map(from_option_trade).collect(),
+                BybitTrade::Spot { list } => {
+                    list.iter().map(from_inverse_linear_spot_trade).collect()
+                }
+            },
+            Err(e) => {
+                println!("{e}");
                 vec![]
             }
         }
