@@ -2,7 +2,6 @@ mod application;
 mod infrastructure;
 mod presentation;
 
-use application::Application;
 use axum::{
     http::{header::CONTENT_TYPE, HeaderValue},
     routing::get,
@@ -15,10 +14,13 @@ use tower_http::{
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+use application::Application;
+use bybit_sdk::{Client as BybitClient, URL_BASE_API_MAINNET_1};
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
 use presentation::{get_candles, get_config, get_symbols, get_trades, Command};
 
-type App = Application<BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange>;
+type App<'a> =
+    Application<BinanceExchange, BingXExchange, BybitExchange<'a>, KrakenExchange, MEXCExchange>;
 
 #[tokio::main]
 async fn main() {
@@ -37,10 +39,11 @@ async fn main() {
 
             let cfg = get_config();
             tracing::debug!("Config: {:?}", cfg);
+            let client_bybit = BybitClient::new(URL_BASE_API_MAINNET_1);
 
             let binance = BinanceExchange::new();
             let bingx = BingXExchange::new();
-            let bybit = BybitExchange::new();
+            let bybit = BybitExchange::new(client_bybit);
             let kraken = KrakenExchange::new();
             let mexc = MEXCExchange::new();
 

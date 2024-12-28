@@ -6,7 +6,7 @@ use crate::{
     GetTradesParams, Trade,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Client<'a> {
     base_url: &'a str,
 }

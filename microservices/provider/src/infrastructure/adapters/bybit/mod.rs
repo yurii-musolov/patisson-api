@@ -5,7 +5,7 @@ use crate::application::{
 };
 use bybit_sdk::{
     self, Client, GetKLinesParams, GetTickersParams, GetTradesParams as BybitGetTradesParams,
-    KLine, Ticker, Trade as BybitTrade, URL_BASE_API_MAINNET_1,
+    KLine, Ticker, Trade as BybitTrade,
 };
 use map::{
     from_inverse_linear_spot_trade, from_kline_row, from_linear_inverse_ticker, from_option_ticker,
@@ -13,19 +13,20 @@ use map::{
 };
 
 #[derive(Debug, Clone)]
-pub struct BybitExchange {}
+pub struct BybitExchange<'a> {
+    client: Client<'a>,
+}
 
-impl BybitExchange {
-    pub fn new() -> Self {
-        Self {}
+impl<'a> BybitExchange<'a> {
+    pub fn new(client: Client<'a>) -> Self {
+        Self { client }
     }
 }
 
-impl Exchanger for BybitExchange {
+impl<'a> Exchanger for BybitExchange<'a> {
     async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol> {
-        // TODO: Make Client outside.
-        let client = Client::new(URL_BASE_API_MAINNET_1);
-        let result = client
+        let result = self
+            .client
             .get_tickers(GetTickersParams {
                 symbol,
                 category: to_category(&schema),
@@ -49,9 +50,8 @@ impl Exchanger for BybitExchange {
     }
 
     async fn get_candles(&self, schema: Schema, params: GetCandlesParams) -> Vec<Candle> {
-        // TODO: make Client outside.
-        let client = Client::new(URL_BASE_API_MAINNET_1);
-        let result = client
+        let result = self
+            .client
             .get_kline(GetKLinesParams {
                 category: to_category(&schema),
                 symbol: params.symbol,
@@ -77,9 +77,8 @@ impl Exchanger for BybitExchange {
     }
 
     async fn get_trades(&self, schema: Schema, params: GetTradesParams) -> Vec<Trade> {
-        // TODO: make Client outside.
-        let client = Client::new(URL_BASE_API_MAINNET_1);
-        let result = client
+        let result = self
+            .client
             .get_public_recent_trading_history(BybitGetTradesParams {
                 category: to_category(&schema),
                 symbol: Some(params.symbol),
