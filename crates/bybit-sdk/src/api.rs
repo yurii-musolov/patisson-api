@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string as number;
 
-use crate::enums::{Category, Interval};
+use crate::{Category, Interval, Side};
 
 #[derive(Debug, Deserialize)]
 pub struct Response<T> {
@@ -221,4 +221,75 @@ pub struct SpotTicker {
     // - Only those trading pairs like "XXX/USDT" or "XXX/USDC" have the value
     #[serde(rename = "usdIndexPrice", deserialize_with = "number")]
     pub usd_index_price: f64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetTradesParams {
+    pub category: Category,
+    // required for spot/linear/inverse
+    // optional for option
+    pub symbol: Option<String>,
+    // Apply to option only
+    // If the field is not passed, return BTC data by default
+    #[serde(rename = "baseCoin")]
+    pub base_coin: Option<String>,
+    // optionType	false	string	Option type. Call or Put. Apply to option only
+    #[serde(rename = "optionType")]
+    pub option_type: Option<u64>,
+    // spot: [1,60], default: 60
+    // others: [1,1000], default: 500
+    pub limit: Option<u64>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "category")]
+pub enum Trade {
+    #[serde(rename = "inverse")]
+    Inverse { list: Vec<InverseLinearSpotTrade> },
+    #[serde(rename = "linear")]
+    Linear { list: Vec<InverseLinearSpotTrade> },
+    #[serde(rename = "option")]
+    Option { list: Vec<OptionTrade> },
+    #[serde(rename = "spot")]
+    Spot { list: Vec<InverseLinearSpotTrade> },
+}
+
+#[derive(Debug, Deserialize)]
+pub struct InverseLinearSpotTrade {
+    #[serde(rename = "execId")]
+    pub exec_id: String,
+    pub symbol: String,
+    #[serde(deserialize_with = "number")]
+    pub price: f64,
+    #[serde(deserialize_with = "number")]
+    pub size: f64,
+    pub side: Side,
+    #[serde(deserialize_with = "number")]
+    pub time: u64,
+    #[serde(rename = "isBlockTrade")]
+    pub is_block_trade: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OptionTrade {
+    #[serde(rename = "execId")]
+    pub exec_id: String,
+    pub symbol: String,
+    #[serde(deserialize_with = "number")]
+    pub price: f64,
+    #[serde(deserialize_with = "number")]
+    pub size: f64,
+    pub side: Side,
+    #[serde(deserialize_with = "number")]
+    pub time: u64,
+    #[serde(rename = "isBlockTrade")]
+    pub is_block_trade: bool,
+    #[serde(rename = "mP", deserialize_with = "number")]
+    pub mark_price: f64,
+    #[serde(rename = "iP", deserialize_with = "number")]
+    pub index_price: f64,
+    #[serde(rename = "mIv", deserialize_with = "number")]
+    pub mark_iv: f64,
+    #[serde(rename = "iv", deserialize_with = "number")]
+    pub iv: f64,
 }

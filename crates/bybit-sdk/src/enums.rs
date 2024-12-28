@@ -137,3 +137,9 @@ impl AccountType {
         )
     }
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum Side {
+    Buy,
+    Sell,
+}
