@@ -17,7 +17,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use application::Application;
 use bybit_sdk::{Client as BybitClient, URL_BASE_API_MAINNET_1};
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
-use presentation::{get_candles, get_config, get_symbols, get_trades, Command};
+use presentation::{get_candles, get_symbols, get_trades, Command};
 
 type App<'a> =
     Application<BinanceExchange, BingXExchange, BybitExchange<'a>, KrakenExchange, MEXCExchange>;
@@ -34,11 +34,9 @@ async fn main() {
         .init();
 
     match Command::parse() {
-        Command::Serve(params) => {
-            tracing::debug!("CLI command: {:?}", params);
+        Command::Serve(args) => {
+            tracing::debug!("CLI command: Serve, args: {:?}", args);
 
-            let cfg = get_config();
-            tracing::debug!("Config: {:?}", cfg);
             let client_bybit = BybitClient::new(URL_BASE_API_MAINNET_1);
 
             let binance = BinanceExchange::new();
@@ -50,12 +48,15 @@ async fn main() {
             let application = Application::new(binance, bingx, bybit, kraken, mexc);
 
             let router = Router::new()
-                .route("/symbols/:exchange/:schema", get(get_symbols::<App>))
+                .route("/symbols/{exchange}/{schema}", get(get_symbols::<App>))
                 .route(
-                    "/candles/:exchange/:schema/:symbol/:interval",
+                    "/candles/{exchange}/{schema}/{symbol}/{interval}",
                     get(get_candles::<App>),
                 )
-                .route("/trades/:exchange/:schema/:symbol", get(get_trades::<App>))
+                .route(
+                    "/trades/{exchange}/{schema}/{symbol}",
+                    get(get_trades::<App>),
+                )
                 .layer(
                     TraceLayer::new_for_http()
                         .make_span_with(DefaultMakeSpan::default().include_headers(true)),
@@ -67,9 +68,7 @@ async fn main() {
                 )
                 .with_state(application);
 
-            let listener = tokio::net::TcpListener::bind(cfg.http_address)
-                .await
-                .unwrap();
+            let listener = tokio::net::TcpListener::bind(args.http_bind).await.unwrap();
 
             tracing::debug!("listening on {}", listener.local_addr().unwrap());
 

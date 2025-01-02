@@ -3,7 +3,7 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use sha2::{digest::generic_array::functional::FunctionalSequence, Digest, Sha256};
+use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 
 use crate::api::{Identity, Pagination, Registration, User};
@@ -32,8 +32,7 @@ pub async fn handler(State(pool): State<PgPool>) -> Result<String, (StatusCode, 
 pub fn hash_sha256(str: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(str);
-    let serial = hasher.finalize();
-    serial.fold(String::new(), |acc, n| format!("{acc}{n:02X}"))
+    format!("{:X}", hasher.finalize())
 }
 
 pub fn internal_error<E>(err: E) -> (StatusCode, String)

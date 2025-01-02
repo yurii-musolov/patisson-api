@@ -33,7 +33,8 @@ services:
       - "${patisson__auth__port:-0}:3000"
     environment:
       PATISSON__AUTH__DATABASE_URL: "postgres://auth_user:auth_pass@postgres:5432/auth_db"
-      PATISSON__AUTH__ADDR: "auth:3000"
+      PATISSON__AUTH__DATABASE_MAX_CONNECTION: 10
+      PATISSON__AUTH__HTTP_ADDR: "auth:3000"
     command: [ "serve" ]
 
   provider:
@@ -47,4 +48,4 @@ services:
       - "${patisson__provider__http_port:-0}:3000"
     environment:
       PATISSON__PROVIDER__HTTP_ADDR: "provider:3000"
-    command: [ "serve", "--http" ]
+    command: [ "serve" ]

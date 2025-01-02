@@ -1,13 +1,11 @@
 mod api;
 mod cli;
-mod config;
 mod handler;
 mod router;
 
 use axum::http::{header::CONTENT_TYPE, HeaderValue};
 use clap::Parser;
 use cli::Command;
-use config::get_config;
 use sqlx::postgres::PgPoolOptions;
 use std::time::Duration;
 use tower_http::{
@@ -28,15 +26,13 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     match Command::parse() {
-        Command::Serve(params) => {
-            tracing::debug!("CLI command: {:?}", params);
-
-            let cfg = get_config(params);
+        Command::Serve(args) => {
+            tracing::debug!("CLI command: Serve, args: {:?}", args);
 
             let pool = PgPoolOptions::new()
-                .max_connections(cfg.db_max_connections)
+                .max_connections(args.db_max_connections)
                 .acquire_timeout(Duration::from_secs(3))
-                .connect(&cfg.db_url)
+                .connect(&args.db_url)
                 .await
                 .expect("can't connect to database");
 
@@ -53,7 +49,7 @@ async fn main() -> anyhow::Result<()> {
                         .allow_headers([CONTENT_TYPE]),
                 );
 
-            let listener = tokio::net::TcpListener::bind(cfg.address).await.unwrap();
+            let listener = tokio::net::TcpListener::bind(args.http_bind).await.unwrap();
 
             tracing::debug!("listening on {}", listener.local_addr().unwrap());
 

@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Args, Parser};
 
 #[derive(Parser)]
 #[clap(about = "Microservice `provider`")]
@@ -7,12 +7,12 @@ pub enum Command {
     Serve(Serve),
 }
 
-#[derive(Debug, clap::Args)]
+#[derive(Debug, Args)]
 pub struct Serve {
-    #[clap(long)]
-    pub http: bool,
-    #[clap(long)]
-    pub rpc: bool,
-    #[clap(long)]
-    pub ws: bool,
+    #[clap(long, env = "PATISSON__PROVIDER__HTTP_ADDR", default_value_t = String::from("127.0.0.1:3000"))]
+    pub http_bind: String,
+    #[clap(long, env = "PATISSON__PROVIDER__RPC_ADDR", default_value_t = String::from("127.0.0.1:3001"))]
+    pub rpc_bind: String,
+    #[clap(long, env = "PATISSON__PROVIDER__WS_ADDR", default_value_t = String::from("127.0.0.1:3002"))]
+    pub ws_bind: String,
 }
