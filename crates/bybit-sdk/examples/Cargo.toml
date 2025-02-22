@@ -7,3 +7,7 @@ authors.workspace = true
 [[example]]
 name = "rest"
 path = "rest.rs"
+
+[[example]]
+name = "stream"
+path = "stream.rs"

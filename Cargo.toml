@@ -8,22 +8,24 @@ edition = "2021"
 authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
 [workspace.dependencies]
-anyhow = "1.0.95"
+anyhow = "1.0.96"
 axum = { version = "0.8.1", features = ["macros"] }
-clap = { version = "4.5.23", features = ["derive", "env"] }
+clap = { version = "4.5.30", features = ["derive", "env"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 reqwest = { version = "0.12.12", features = ["json"] }
-serde = { version = "1.0.217", features = ["derive"] }
-serde-aux = "4.5.0"
-serde_json = "1.0.134"
+serde = { version = "1.0.218", features = ["derive"] }
+serde-aux = "4.6.0"
+serde_json = "1.0.139"
 sha2 = "0.10.8"
-sqlx = { version = "0.8.2", features = [
+sqlx = { version = "0.8.3", features = [
   "postgres",
   "runtime-tokio",
   "runtime-tokio-rustls",
   "time",
   "uuid",
 ] }
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.43.0", features = ["full"] }
+tokio-tungstenite = { version = "0.26.2", features = ["native-tls"] }
 tower-http = { version = "0.6.1", features = ["cors", "fs", "trace"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }

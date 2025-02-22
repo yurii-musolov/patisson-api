@@ -1,11 +1,17 @@
 mod api;
 mod client;
 mod enums;
+mod incoming_message;
+mod outgoing_message;
+mod stream;
 mod url;
 
 pub use api::*;
 pub use client::*;
 pub use enums::*;
+pub use incoming_message::*;
+pub use outgoing_message::*;
+pub use stream::*;
 pub use url::{
     HEADER_REFERER, HEADER_X_BAPI_API_KEY, HEADER_X_BAPI_SIGN, HEADER_X_BAPI_TIMESTAMP,
     HEADER_X_REFERER, URL_BASE_API_DEMO_TRADING, URL_BASE_API_MAINNET_1, URL_BASE_API_MAINNET_2,
