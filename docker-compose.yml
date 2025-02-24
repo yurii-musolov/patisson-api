@@ -1,3 +1,5 @@
+name: patisson
+
 networks:
   default:
 
@@ -7,7 +9,7 @@ volumes:
 services:
 
   postgres:
-    image: "postgres:17.2-alpine3.21"
+    image: "postgres:17.4-alpine3.21"
     container_name: "patisson_postgres"
     restart: always
     ports:
