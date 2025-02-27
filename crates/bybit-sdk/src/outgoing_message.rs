@@ -22,6 +22,14 @@ pub enum OutgoingMessage {
     Ping { req_id: Option<String> },
 }
 
+#[inline]
+pub fn serialize_outgoing_message<T>(msg: &T) -> serde_json::Result<String>
+where
+    T: ?Sized + Serialize,
+{
+    serde_json::to_string(msg)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -33,7 +41,7 @@ mod tests {
             args: vec![String::from("tickers.BTCUSDT")],
         };
         let expected = r#"{"op":"subscribe","req_id":"request_id","args":["tickers.BTCUSDT"]}"#;
-        let serialized = serde_json::to_string(&msg).unwrap();
+        let serialized = serialize_outgoing_message(&msg).unwrap();
         assert_eq!(serialized, expected);
     }
 
@@ -44,7 +52,7 @@ mod tests {
             args: vec![String::from("tickers.BTCUSDT")],
         };
         let expected = r#"{"op":"unsubscribe","req_id":"request_id","args":["tickers.BTCUSDT"]}"#;
-        let serialized = serde_json::to_string(&msg).unwrap();
+        let serialized = serialize_outgoing_message(&msg).unwrap();
         assert_eq!(serialized, expected);
     }
 
@@ -60,7 +68,7 @@ mod tests {
         };
         let expected =
             r#"{"op":"auth","req_id":"request_id","args":["api_key",1662350400000,"signature"]}"#;
-        let serialized = serde_json::to_string(&msg).unwrap();
+        let serialized = serialize_outgoing_message(&msg).unwrap();
         assert_eq!(serialized, expected);
     }
 }
