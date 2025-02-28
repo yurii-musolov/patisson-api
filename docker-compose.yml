@@ -1,4 +1,4 @@
-name: patisson
+name: patisson-api
 
 networks:
   default:
@@ -21,6 +21,21 @@ services:
       POSTGRES_PASSWORD: "${PATISSON__POSTGRES__PASSWORD}"
       POSTGRES_USER: "${PATISSON__POSTGRES__USER}"
 
+  setup:
+    build:
+      context: "."
+      target: "setup"
+    image: "patisson-setup"
+    container_name: "patisson_setup"
+    restart: no
+    depends_on:
+      postgres:
+        condition: service_started
+    environment:
+      # TODO: Use the DBA username and password for DBs migration.
+      PATISSON__AUTH__DATABASE_URL: "postgres://auth_user:auth_pass@postgres:5432/auth_db"
+    command: [ "migrate" ]
+
   auth:
     build:
       context: "."
@@ -31,6 +46,8 @@ services:
     depends_on:
       postgres:
         condition: service_started
+      setup:
+        condition: service_completed_successfully
     ports:
       - "${patisson__auth__port:-0}:3000"
     environment:
