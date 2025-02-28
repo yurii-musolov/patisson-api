@@ -3,17 +3,15 @@ use axum::{
     http::StatusCode,
     Json,
 };
+use chrono::{prelude::*, Duration};
+use jsonwebtoken::{encode, Header};
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
 
-use crate::api::{Identity, Pagination, Registration, User};
-
-pub async fn handler(State(pool): State<PgPool>) -> Result<String, (StatusCode, String)> {
-    sqlx::query_scalar("select 'hello world from pg'")
-        .fetch_one(&pool)
-        .await
-        .map_err(internal_error)
-}
+use crate::api::{
+    AccessClaims, AuthError, ChangePassword, Identity, Pagination, Profile, ProfileUpdate, SignIn,
+    SignInResponse, SignUp, User, KEYS,
+};
 
 /// Hash function for SHA256.
 ///
@@ -44,6 +42,80 @@ where
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
+pub fn create_tokens(username: String) -> Result<SignInResponse, Box<dyn std::error::Error>> {
+    let now = Utc::now();
+    let exp = (now + Duration::minutes(5)).timestamp();
+    let now = now.timestamp();
+
+
+    let claims = AccessClaims {
+        iss: "https://token.patisson.com/v1/token".to_owned(), // Issuer
+        sub: username,                                         // client_id
+        aud: "https://auth.patisson.com/v1/authorization".to_owned(), // Recipient
+        exp,
+        nbf: now,
+        iat: now,
+        jti: "JWT-ID".to_owned(),
+    };
+    let access_token = encode(&Header::default(), &claims, &KEYS.encoding)?;
+
+    Ok(SignInResponse::new(access_token))
+}
+
+pub async fn sign_in(Json(dto): Json<SignIn>) -> Result<Json<SignInResponse>, AuthError> {
+    if dto.username.is_empty() || dto.password.is_empty() {
+        return Err(AuthError::MissingCredentials);
+    }
+    if dto.username != "nemo" || dto.password != "password" {
+        return Err(AuthError::WrongCredentials);
+    }
+
+    let response = create_tokens(dto.username).map_err(|_| AuthError::TokenCreation)?;
+
+    Ok(Json(response))
+}
+
+pub async fn sign_out(claims: AccessClaims) -> (StatusCode, String) {
+    // TODO: Add implementation.
+    tracing::debug!("Sign out. claims.sub: {}", claims.sub);
+    (StatusCode::NOT_IMPLEMENTED, "Not implemented".to_string())
+}
+
+pub async fn get_profile(claims: AccessClaims) -> Result<Json<Profile>, (StatusCode, String)> {
+    // TODO: Add implementation.
+    tracing::debug!("Get profile. claims.sub: {}", claims.sub);
+
+    let response = Profile {
+        id: 123456789,
+        username: "NOT_IMPLEMENTED".to_string(),
+    };
+    Ok(Json(response))
+}
+
+pub async fn update_profile(
+    claims: AccessClaims,
+    Json(dto): Json<ProfileUpdate>,
+) -> (StatusCode, String) {
+    // TODO: Add implementation.
+    tracing::debug!(
+        "Update profile. claims.sub: {}, username: {:?}",
+        claims.sub,
+        dto.username
+    );
+
+    (StatusCode::NOT_IMPLEMENTED, "Not implemented".to_string())
+}
+
+pub async fn change_password(
+    claims: AccessClaims,
+    Json(dto): Json<ChangePassword>,
+) -> (StatusCode, String) {
+    // TODO: Add implementation.
+    tracing::debug!("CHange password. claims.sub: {}", claims.sub);
+
+    (StatusCode::NOT_IMPLEMENTED, "Not implemented".to_string())
+}
+
 pub async fn get_user_list(
     State(pool): State<PgPool>,
     Query(pagination): Query<Pagination>,
@@ -60,7 +132,6 @@ pub async fn get_user_list(
                 .map(|record| User {
                     id: record.id,
                     username: record.username,
-                    password_hash: record.password_hash,
                 })
                 .collect()
         })
@@ -81,7 +152,6 @@ pub async fn get_user_by_id(
         .map(|record| User {
             id: record.id,
             username: record.username.clone(),
-            password_hash: record.password_hash.clone(),
         }) {
         Ok(user) => Ok(Json(user)),
         Err(err) => {
@@ -91,9 +161,9 @@ pub async fn get_user_by_id(
     }
 }
 
-pub async fn registration(
+pub async fn sign_up(
     State(pool): State<PgPool>,
-    Json(payload): Json<Registration>,
+    Json(payload): Json<SignUp>,
 ) -> Result<Json<Identity>, (StatusCode, String)> {
     let password_hash = hash_sha256(&payload.password);
 
