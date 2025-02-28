@@ -20,6 +20,8 @@ pub enum OutgoingMessage {
     },
     #[serde(rename = "ping")]
     Ping { req_id: Option<String> },
+    #[serde(rename = "pong")]
+    Pong { req_id: Option<String> },
 }
 
 #[inline]

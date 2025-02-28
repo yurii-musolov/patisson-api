@@ -23,7 +23,7 @@ impl<'a> BybitExchange<'a> {
     }
 }
 
-impl<'a> Exchanger for BybitExchange<'a> {
+impl Exchanger for BybitExchange<'_> {
     async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol> {
         let result = self
             .client

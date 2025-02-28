@@ -42,6 +42,14 @@ pub enum CommandMsg {
         args: Option<Vec<String>>,
         success: bool,
     },
+    #[serde(rename = "ping")]
+    Ping {
+        req_id: Option<String>,
+        ret_msg: Option<String>,
+        conn_id: String,
+        args: Option<Vec<String>>,
+        success: bool,
+    },
 }
 
 #[derive(PartialEq, Deserialize, Debug)]
@@ -315,7 +323,7 @@ mod tests {
                 last_price: 84594.40,
                 pre_open_price: None,
                 pre_qty: None,
-                cur_pre_listing_phase: None,
+                cur_pre_listing_phase: Some(String::from("")),
                 prev_price24h: 88539.30,
                 price24h_pcnt: -0.044555,
                 high_price24h: 89389.90,

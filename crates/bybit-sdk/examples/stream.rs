@@ -1,14 +1,17 @@
+use std::time::Duration;
+use tokio::{self, time::sleep};
+
 use bybit_sdk::{
     stream_async, IncomingMessage, OutgoingMessage, TickerMsg, PATH_PUBLIC_LINEAR,
     URL_BASE_STREAM_MAINNET,
 };
-use std::time::Duration;
-use tokio::{self, time::sleep};
+
+const WEBSOCKET_PING_INTERVAL: u64 = 60; // Sec.
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let url = format!("{URL_BASE_STREAM_MAINNET}{PATH_PUBLIC_LINEAR}");
-    let (tx, mut rx) = stream_async(&url).await?;
+    let (tx, mut rx) = stream_async(&url, WEBSOCKET_PING_INTERVAL).await?;
 
     tokio::spawn(async move {
         let message = OutgoingMessage::Subscribe {
@@ -19,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Send with error: {e}");
         };
 
-        sleep(Duration::from_secs(1)).await;
+        sleep(Duration::from_secs(5)).await;
 
         let message = OutgoingMessage::Unsubscribe {
             req_id: Some(String::from("req-0002")),
