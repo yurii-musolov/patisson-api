@@ -18,7 +18,7 @@ use std::fmt::Display;
 use std::sync::LazyLock;
 
 pub static KEYS: LazyLock<Keys> = LazyLock::new(|| {
-    let secret = String::from("JWT_SECRET");
+    let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 
     Keys::new(secret.as_bytes())
 });
@@ -104,7 +104,7 @@ impl SignInResponse {
             access_token: access_token.clone(),
             token_type: Bearer::SCHEME.to_string(),
             expires_in: 0,
-            refresh_token: access_token,
+            refresh_token: "".to_string(),
             scope: "update openid profile email".to_string(),
         }
     }

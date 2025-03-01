@@ -6,7 +6,7 @@ use axum::{
 use chrono::{prelude::*, Duration};
 use jsonwebtoken::{encode, Header};
 use sha2::{Digest, Sha256};
-use sqlx::PgPool;
+use sqlx::{PgPool, Pool, Postgres};
 
 use crate::api::{
     AccessClaims, AuthError, ChangePassword, Identity, Pagination, Profile, ProfileUpdate, SignIn,
@@ -42,15 +42,14 @@ where
     (StatusCode::INTERNAL_SERVER_ERROR, err.to_string())
 }
 
-pub fn create_tokens(username: String) -> Result<SignInResponse, Box<dyn std::error::Error>> {
+pub fn create_tokens(id: i64) -> Result<SignInResponse, Box<dyn std::error::Error>> {
     let now = Utc::now();
     let exp = (now + Duration::minutes(5)).timestamp();
     let now = now.timestamp();
 
-
     let claims = AccessClaims {
         iss: "https://token.patisson.com/v1/token".to_owned(), // Issuer
-        sub: username,                                         // client_id
+        sub: id.to_string(),                                   // client_id
         aud: "https://auth.patisson.com/v1/authorization".to_owned(), // Recipient
         exp,
         nbf: now,
@@ -62,15 +61,22 @@ pub fn create_tokens(username: String) -> Result<SignInResponse, Box<dyn std::er
     Ok(SignInResponse::new(access_token))
 }
 
-pub async fn sign_in(Json(dto): Json<SignIn>) -> Result<Json<SignInResponse>, AuthError> {
+pub async fn sign_in(
+    State(pool): State<PgPool>,
+    Json(dto): Json<SignIn>,
+) -> Result<Json<SignInResponse>, AuthError> {
     if dto.username.is_empty() || dto.password.is_empty() {
         return Err(AuthError::MissingCredentials);
     }
-    if dto.username != "nemo" || dto.password != "password" {
+
+    let (id, _username, password_hash) = fetch_user_by_username(&pool, &dto.username)
+        .await
+        .map_err(|_| AuthError::WrongCredentials)?;
+    if hash_sha256(&dto.password) != password_hash {
         return Err(AuthError::WrongCredentials);
     }
 
-    let response = create_tokens(dto.username).map_err(|_| AuthError::TokenCreation)?;
+    let response = create_tokens(id).map_err(|_| AuthError::TokenCreation)?;
 
     Ok(Json(response))
 }
@@ -81,15 +87,28 @@ pub async fn sign_out(claims: AccessClaims) -> (StatusCode, String) {
     (StatusCode::NOT_IMPLEMENTED, "Not implemented".to_string())
 }
 
-pub async fn get_profile(claims: AccessClaims) -> Result<Json<Profile>, (StatusCode, String)> {
+pub async fn get_profile(
+    State(pool): State<PgPool>,
+    claims: AccessClaims,
+) -> Result<Json<Profile>, (StatusCode, String)> {
     // TODO: Add implementation.
     tracing::debug!("Get profile. claims.sub: {}", claims.sub);
 
-    let response = Profile {
-        id: 123456789,
-        username: "NOT_IMPLEMENTED".to_string(),
-    };
-    Ok(Json(response))
+    let user_id = claims.sub.parse().map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            String::from("claims.sub is not integer"),
+        )
+    })?;
+
+    let (id, username, _) = fetch_user_by_id(&pool, user_id).await.map_err(|_| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            String::from("User not found."),
+        )
+    })?;
+
+    Ok(Json(Profile { id, username }))
 }
 
 pub async fn update_profile(
@@ -111,7 +130,11 @@ pub async fn change_password(
     Json(dto): Json<ChangePassword>,
 ) -> (StatusCode, String) {
     // TODO: Add implementation.
-    tracing::debug!("CHange password. claims.sub: {}", claims.sub);
+    tracing::debug!(
+        "CHange password. claims.sub: {}, dto.password: {}",
+        claims.sub,
+        dto.password
+    );
 
     (StatusCode::NOT_IMPLEMENTED, "Not implemented".to_string())
 }
@@ -146,36 +169,50 @@ pub async fn get_user_by_id(
     State(pool): State<PgPool>,
     Path(id): Path<i64>,
 ) -> Result<Json<User>, StatusCode> {
-    match sqlx::query_file!("./sql/get-user-by-id.sql", id)
-        .fetch_one(&pool)
+    fetch_user_by_id(&pool, id)
         .await
-        .map(|record| User {
-            id: record.id,
-            username: record.username.clone(),
-        }) {
-        Ok(user) => Ok(Json(user)),
-        Err(err) => {
+        .map(|(id, username, _password)| Json(User { id, username }))
+        .map_err(|err| {
             tracing::error!("{err:?}");
-            Err(StatusCode::NOT_FOUND)
-        }
-    }
+            StatusCode::NOT_FOUND
+        })
+}
+
+pub async fn fetch_user_by_id(
+    pool: &Pool<Postgres>,
+    id: i64,
+) -> Result<(i64, String, String), Box<dyn std::error::Error>> {
+    let row = sqlx::query_file!("./sql/get-user-by-id.sql", id)
+        .fetch_one(pool)
+        .await?;
+
+    Ok((row.id, row.username, row.password_hash))
+}
+
+pub async fn fetch_user_by_username(
+    pool: &Pool<Postgres>,
+    username: &str,
+) -> Result<(i64, String, String), Box<dyn std::error::Error>> {
+    let row = sqlx::query_file!("./sql/get-user-by-username.sql", username)
+        .fetch_one(pool)
+        .await?;
+
+    Ok((row.id, row.username, row.password_hash))
 }
 
 pub async fn sign_up(
     State(pool): State<PgPool>,
     Json(payload): Json<SignUp>,
-) -> Result<Json<Identity>, (StatusCode, String)> {
+) -> Result<(StatusCode, Json<Identity>), (StatusCode, String)> {
     let password_hash = hash_sha256(&payload.password);
 
-    match sqlx::query_file!("./sql/create-user.sql", payload.username, password_hash)
+    // TODO: Check 'username' in DB. StatusCode::CONFLICT
+
+    sqlx::query_file!("./sql/create-user.sql", payload.username, password_hash)
         .fetch_one(&pool)
         .await
-    {
-        Ok(row) => {
-            // TODO: StatusCode::CREATED
-            Ok(Json(Identity { id: row.id }))
-        }
-        Err(err) => {
+        .map(|row| (StatusCode::CREATED, Json(Identity { id: row.id })))
+        .map_err(|err| {
             let reason = err.to_string();
             let pattern = "duplicate key value violates unique constraint";
             let code = if reason.contains(pattern) {
@@ -184,7 +221,6 @@ pub async fn sign_up(
                 StatusCode::INTERNAL_SERVER_ERROR
             };
 
-            Err((code, reason))
-        }
-    }
+            (code, reason)
+        })
 }

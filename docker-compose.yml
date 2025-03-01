@@ -54,6 +54,7 @@ services:
       PATISSON__AUTH__DATABASE_URL: "postgres://auth_user:auth_pass@postgres:5432/auth_db"
       PATISSON__AUTH__DATABASE_MAX_CONNECTION: 10
       PATISSON__AUTH__HTTP_ADDR: "auth:3000"
+      JWT_SECRET: "${JWT_SECRET}"
     command: [ "serve" ]
 
   provider:
