@@ -45,6 +45,8 @@ pub const HEADER_X_BAPI_LIMIT: &str = "X-Bapi-Limit";
 pub const HEADER_X_BAPI_LIMIT_STATUS: &str = "X-Bapi-Limit-Status";
 /// The timestamp indicating when your request limit resets if you have exceeded your rate_limit. Otherwise, this is just the current timestamp (it may not exactly match timeNow).
 pub const HEADER_X_BAPI_LIMIT_RESET_TIMESTAMP: &str = "X-Bapi-Limit-Reset-Timestamp";
+///  To assist in diagnosing advanced network problems. Its value should be unique for each request.
+pub const HEADER_CDN_REQUEST_ID: &str = "cdn-request-id";
 
 // Candlestick, orderbook, ticker, platform transaction data, underlying financial rules, risk control rules
 pub const PATH_MARKET_KLINE: &str = "/v5/market/kline";
