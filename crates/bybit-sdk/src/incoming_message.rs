@@ -269,7 +269,7 @@ pub enum AllLiquidationMsg {
     Snapshot {
         topic: String,
         ts: u64,
-        data: AllLiquidationSnapshotMsg,
+        data: Vec<AllLiquidationSnapshotMsg>,
     },
 }
 
@@ -491,6 +491,38 @@ mod tests {
                 index_price: None,
                 mark_iv: None,
                 iv: None,
+            }],
+        });
+        assert_eq!(message, expected);
+    }
+
+    #[test]
+    fn deserialize_incoming_message_all_liquidation_snapshot() {
+        // Category: linear.
+        let json = r#"{
+            "topic":"allLiquidation.BTCUSDT",
+            "type":"snapshot",
+            "ts":1741450605553,
+            "data":[
+                {
+                    "T":1741450605236,
+                    "s":"BTCUSDT",
+                    "S":"Buy",
+                    "v":"0.001",
+                    "p":"85823.60"
+                }
+            ]
+        }"#;
+        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let expected = IncomingMessage::AllLiquidation(AllLiquidationMsg::Snapshot {
+            topic: String::from("allLiquidation.BTCUSDT"),
+            ts: 1741450605553,
+            data: vec![AllLiquidationSnapshotMsg {
+                time: 1741450605236,
+                symbol: String::from("BTCUSDT"),
+                side: Side::Buy,
+                size: 0.001,
+                price: 85823.60,
             }],
         });
         assert_eq!(message, expected);
