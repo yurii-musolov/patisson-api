@@ -3,10 +3,20 @@
 // Mainnet.
 pub const URL_BASE_API_MAINNET_1: &str = "https://api.bybit.com";
 pub const URL_BASE_API_MAINNET_2: &str = "https://api.bytick.com";
-pub const URL_BASE_API_MAINNET_3: &str = "https://api.bybit.nl"; // For Netherland users.
-pub const URL_BASE_API_MAINNET_4: &str = "https://api.byhkbit.com"; // For Hong Kong users.
+/// For Netherland users.
+pub const URL_BASE_API_MAINNET_3: &str = "https://api.bybit.nl";
+/// For Hong Kong users.
+pub const URL_BASE_API_MAINNET_4: &str = "https://api.byhkbit.com";
+/// For Turkey users.
+pub const URL_BASE_API_MAINNET_5: &str = "wss://api.bybit-tr.com";
+/// For Kazakhstan users.
+pub const URL_BASE_API_MAINNET_6: &str = "wss://api.bybit.kz";
 
-pub const URL_BASE_STREAM_MAINNET: &str = "wss://stream.bybit.com";
+pub const URL_BASE_STREAM_MAINNET_1: &str = "wss://stream.bybit.com";
+/// For Turkey users.
+pub const URL_BASE_STREAM_MAINNET_2: &str = "wss://stream.bybit-tr.com";
+/// For Kazakhstan users.
+pub const URL_BASE_STREAM_MAINNET_3: &str = "wss://stream.bybit.kz";
 
 // Testnet.
 pub const URL_BASE_API_TESTNET: &str = "https://api-testnet.bybit.com";
@@ -17,11 +27,24 @@ pub const URL_BASE_API_DEMO_TRADING: &str = "https://api-demo.bybit.com";
 pub const URL_BASE_STREAM_DEMO_TRADING: &str = "wss://stream-demo.bybit.com";
 
 // The following HTTP header keys must be used for authentication:
-pub const HEADER_X_BAPI_API_KEY: &str = "X-BAPI-API-KEY"; // API key.
-pub const HEADER_X_BAPI_TIMESTAMP: &str = "X-BAPI-TIMESTAMP"; // UTC timestamp in milliseconds.
-pub const HEADER_X_BAPI_SIGN: &str = "X-BAPI-SIGN"; // A signature derived from the request's parameters.
-pub const HEADER_X_REFERER: &str = "X-Referer"; // The header for broker users only.
-pub const HEADER_REFERER: &str = "Referer"; // The header for broker users only.
+/// API key.
+pub const HEADER_X_BAPI_API_KEY: &str = "X-BAPI-API-KEY";
+/// UTC timestamp in milliseconds.
+pub const HEADER_X_BAPI_TIMESTAMP: &str = "X-BAPI-TIMESTAMP";
+/// A signature derived from the request's parameters.
+pub const HEADER_X_BAPI_SIGN: &str = "X-BAPI-SIGN";
+/// The header for broker users only.
+pub const HEADER_X_REFERER: &str = "X-Referer";
+/// The header for broker users only.
+pub const HEADER_REFERER: &str = "Referer";
+/// The header for specify how long an HTTP request is valid (unit in millisecond and default value is 5,000). It is also used to prevent replay attacks..
+pub const HEADER_X_BAPI_RECV_WINDOW: &str = "X-BAPI-RECV-WINDOW";
+/// Your remaining requests for current endpoint.
+pub const HEADER_X_BAPI_LIMIT: &str = "X-Bapi-Limit";
+/// Your current limit for current endpoint.
+pub const HEADER_X_BAPI_LIMIT_STATUS: &str = "X-Bapi-Limit-Status";
+/// The timestamp indicating when your request limit resets if you have exceeded your rate_limit. Otherwise, this is just the current timestamp (it may not exactly match timeNow).
+pub const HEADER_X_BAPI_LIMIT_RESET_TIMESTAMP: &str = "X-Bapi-Limit-Reset-Timestamp";
 
 // Candlestick, orderbook, ticker, platform transaction data, underlying financial rules, risk control rules
 pub const PATH_MARKET_KLINE: &str = "/v5/market/kline";
@@ -116,9 +139,10 @@ pub const PATH_SPOT_MARGIN_TRADE_SWITCH_MODE: &str = "/v5/spot-margin-trade/swit
 pub const PATH_SPOT_MARGIN_TRADE_SET_LEVERAGE: &str = "/v5/spot-margin-trade/set-leverage";
 pub const PATH_SPOT_MARGIN_TRADE_SET_PLEDGE_TOKEN: &str = "/v5/spot-margin-trade/set-pledge-token";
 
-// Stream urls.
+// Stream paths.
 pub const PATH_PUBLIC_SPOT: &str = "/v5/public/spot";
 pub const PATH_PUBLIC_LINEAR: &str = "/v5/public/linear";
 pub const PATH_PUBLIC_INVERSE: &str = "/v5/public/inverse";
 pub const PATH_PUBLIC_OPTION: &str = "/v5/public/option";
 pub const PATH_PRIVATE: &str = "/v5/private";
+pub const PATH_TRADE: &str = "/v5/trade";
