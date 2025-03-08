@@ -1,13 +1,16 @@
 use serde::Deserialize;
 use serde_aux::prelude::{deserialize_number_from_string, deserialize_option_number_from_string};
 
-use crate::TickDirection;
+use crate::{Interval, Side, TickDirection};
 
 #[derive(PartialEq, Deserialize, Debug)]
 #[serde(untagged)]
 pub enum IncomingMessage {
     Command(CommandMsg),
     Ticker(TickerMsg),
+    Trade(TradeMsg),
+    KLine(KLineMsg),
+    AllLiquidation(AllLiquidationMsg),
 }
 
 #[derive(PartialEq, Deserialize, Debug)]
@@ -185,6 +188,105 @@ pub struct TickerDeltaMsg {
     pub predicted_delivery_price: Option<f64>,
 }
 
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(tag = "type")]
+pub enum TradeMsg {
+    #[serde(rename = "snapshot")]
+    Snapshot {
+        id: Option<String>,
+        topic: String,
+        ts: u64,
+        data: Vec<TradeSnapshotMsg>,
+    },
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+pub struct TradeSnapshotMsg {
+    #[serde(rename = "T")]
+    pub time: u64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "S")]
+    pub side: Side,
+    #[serde(rename = "v", deserialize_with = "deserialize_number_from_string")]
+    pub size: f64,
+    #[serde(rename = "p", deserialize_with = "deserialize_number_from_string")]
+    pub price: f64,
+    #[serde(rename = "L")]
+    pub tick_direction: TickDirection,
+    #[serde(rename = "i")]
+    pub trade_id: String,
+    #[serde(rename = "BT")]
+    pub block_trade: bool,
+    #[serde(rename = "RPI")]
+    pub rpi_trade: Option<bool>,
+    #[serde(rename = "mP")]
+    pub mark_price: Option<String>,
+    #[serde(rename = "iP")]
+    pub index_price: Option<String>,
+    #[serde(rename = "mlv")]
+    pub mark_iv: Option<String>,
+    #[serde(rename = "iv")]
+    pub iv: Option<String>,
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(tag = "type")]
+pub enum KLineMsg {
+    #[serde(rename = "snapshot")]
+    Snapshot {
+        topic: String,
+        ts: u64,
+        data: Vec<KLineSnapshotMsg>,
+    },
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+pub struct KLineSnapshotMsg {
+    pub start: u64,
+    pub end: u64,
+    pub interval: Interval,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub open: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub close: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub high: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub low: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub volume: f64,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub turnover: f64,
+    pub confirm: bool,
+    pub timestamp: u64,
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(tag = "type")]
+pub enum AllLiquidationMsg {
+    #[serde(rename = "snapshot")]
+    Snapshot {
+        topic: String,
+        ts: u64,
+        data: AllLiquidationSnapshotMsg,
+    },
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+pub struct AllLiquidationSnapshotMsg {
+    #[serde(rename = "T")]
+    pub time: u64,
+    #[serde(rename = "s")]
+    pub symbol: String,
+    #[serde(rename = "S")]
+    pub side: Side, // When you receive a Buy update, this means that a long position has been liquidated
+    #[serde(rename = "v", deserialize_with = "deserialize_number_from_string")]
+    pub size: f64,
+    #[serde(rename = "p", deserialize_with = "deserialize_number_from_string")]
+    pub price: f64,
+}
+
 #[inline]
 pub fn deserialize_incoming_message_slice(message: &[u8]) -> serde_json::Result<IncomingMessage> {
     serde_json::from_slice(message)
@@ -346,6 +448,50 @@ mod tests {
                 delivery_fee_rate: None,
                 predicted_delivery_price: None,
             },
+        });
+        assert_eq!(message, expected);
+    }
+
+    #[test]
+    fn deserialize_incoming_message_trade_snapshot() {
+        // Category: linear.
+        let json = r#"{
+            "topic":"publicTrade.BTCUSDT",
+            "type":"snapshot",
+            "ts":1741433245359,
+            "data":[
+                {
+                    "T":1741433245357,
+                    "s":"BTCUSDT",
+                    "S":"Buy",
+                    "v":"0.007",
+                    "p":"85821.00",
+                    "L":"PlusTick",
+                    "i":"485eaa70-df6e-5260-bbef-4f7324e3c5d9",
+                    "BT":false
+                }
+            ]
+        }"#;
+        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let expected = IncomingMessage::Trade(TradeMsg::Snapshot {
+            id: None,
+            topic: String::from("publicTrade.BTCUSDT"),
+            ts: 1741433245359,
+            data: vec![TradeSnapshotMsg {
+                time: 1741433245357,
+                symbol: String::from("BTCUSDT"),
+                side: Side::Buy,
+                size: 0.007,
+                price: 85821.00,
+                tick_direction: TickDirection::PlusTick,
+                trade_id: String::from("485eaa70-df6e-5260-bbef-4f7324e3c5d9"),
+                block_trade: false,
+                rpi_trade: None,
+                mark_price: None,
+                index_price: None,
+                mark_iv: None,
+                iv: None,
+            }],
         });
         assert_eq!(message, expected);
     }

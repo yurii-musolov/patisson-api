@@ -2,33 +2,96 @@ use std::time::Duration;
 use tokio::{self, time::sleep};
 
 use bybit_sdk::{
-    stream_async, IncomingMessage, OutgoingMessage, TickerMsg, PATH_PUBLIC_LINEAR,
+    stream_async, topic_all_liquidation, topic_kline, topic_ticker, topic_trade, IncomingMessage,
+    Interval, KLineMsg, OutgoingMessage, TickerMsg, TradeMsg, PATH_PUBLIC_LINEAR,
     URL_BASE_STREAM_MAINNET,
 };
 
-const WEBSOCKET_PING_INTERVAL: u64 = 60; // Sec.
+const WEBSOCKET_PING_INTERVAL: u64 = 10; // Sec.
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let url = format!("{URL_BASE_STREAM_MAINNET}{PATH_PUBLIC_LINEAR}");
+    let message_0001: OutgoingMessage = OutgoingMessage::Subscribe {
+        req_id: Some(String::from("req-0001")),
+        args: vec![topic_ticker("BTCUSDT")],
+    };
+    let message_0002: OutgoingMessage = OutgoingMessage::Unsubscribe {
+        req_id: Some(String::from("req-0002")),
+        args: vec![topic_ticker("BTCUSDT")],
+    };
+    let message_0003: OutgoingMessage = OutgoingMessage::Subscribe {
+        req_id: Some(String::from("req-0003")),
+        args: vec![topic_trade("BTCUSDT")],
+    };
+    let message_0004: OutgoingMessage = OutgoingMessage::Unsubscribe {
+        req_id: Some(String::from("req-0004")),
+        args: vec![topic_trade("BTCUSDT")],
+    };
+    let message_0005: OutgoingMessage = OutgoingMessage::Subscribe {
+        req_id: Some(String::from("req-0005")),
+        args: vec![topic_kline("BTCUSDT", Interval::Minute1)],
+    };
+    let message_0006: OutgoingMessage = OutgoingMessage::Unsubscribe {
+        req_id: Some(String::from("req-0006")),
+        args: vec![topic_kline("BTCUSDT", Interval::Minute1)],
+    };
+
+    let message_0007: OutgoingMessage = OutgoingMessage::Subscribe {
+        req_id: Some(String::from("req-0007")),
+        args: vec![topic_all_liquidation("BTCUSDT")],
+    };
+    let message_0008: OutgoingMessage = OutgoingMessage::Unsubscribe {
+        req_id: Some(String::from("req-0008")),
+        args: vec![topic_all_liquidation("BTCUSDT")],
+    };
+
     let (tx, mut rx) = stream_async(&url, WEBSOCKET_PING_INTERVAL).await?;
 
     tokio::spawn(async move {
-        let message = OutgoingMessage::Subscribe {
-            req_id: Some(String::from("req-0001")),
-            args: vec![String::from("tickers.BTCUSDT")],
-        };
-        if let Err(e) = tx.send(message).await {
+        if let Err(e) = tx.send(message_0001).await {
             println!("Send with error: {e}");
         };
 
         sleep(Duration::from_secs(5)).await;
 
-        let message = OutgoingMessage::Unsubscribe {
-            req_id: Some(String::from("req-0002")),
-            args: vec![String::from("tickers.BTCUSDT")],
+        if let Err(e) = tx.send(message_0002).await {
+            println!("Send with error: {e}");
         };
-        if let Err(e) = tx.send(message).await {
+
+        sleep(Duration::from_secs(2)).await;
+
+        if let Err(e) = tx.send(message_0003).await {
+            println!("Send with error: {e}");
+        };
+
+        sleep(Duration::from_secs(5)).await;
+
+        if let Err(e) = tx.send(message_0004).await {
+            println!("Send with error: {e}");
+        };
+
+        sleep(Duration::from_secs(2)).await;
+
+        if let Err(e) = tx.send(message_0005).await {
+            println!("Send with error: {e}");
+        };
+
+        sleep(Duration::from_secs(5)).await;
+
+        if let Err(e) = tx.send(message_0006).await {
+            println!("Send with error: {e}");
+        };
+
+        sleep(Duration::from_secs(2)).await;
+
+        if let Err(e) = tx.send(message_0007).await {
+            println!("Send with error: {e}");
+        };
+
+        sleep(Duration::from_secs(3600)).await;
+
+        if let Err(e) = tx.send(message_0008).await {
             println!("Send with error: {e}");
         };
     });
@@ -53,6 +116,28 @@ fn print(message: IncomingMessage) {
             TickerMsg::Delta {
                 topic: _,
                 cs: _,
+                ts: _,
+                data,
+            } => println!("{data:?}"),
+        },
+        IncomingMessage::Trade(message) => match message {
+            TradeMsg::Snapshot {
+                id: _,
+                topic: _,
+                ts: _,
+                data,
+            } => println!("{data:?}"),
+        },
+        IncomingMessage::KLine(message) => match message {
+            KLineMsg::Snapshot {
+                topic: _,
+                ts: _,
+                data,
+            } => println!("{data:?}"),
+        },
+        IncomingMessage::AllLiquidation(message) => match message {
+            bybit_sdk::AllLiquidationMsg::Snapshot {
+                topic: _,
                 ts: _,
                 data,
             } => println!("{data:?}"),

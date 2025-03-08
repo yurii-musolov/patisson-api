@@ -67,7 +67,7 @@ pub enum TickDirection {
     ZeroMinusTick, // trade occurs at the same price as the previous trade, which occurred at a price lower than that for the trade preceding it
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum Interval {
     #[serde(rename = "1")]
     Minute1,
@@ -140,7 +140,7 @@ impl AccountType {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub enum Side {
     Buy,
     Sell,

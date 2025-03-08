@@ -4,6 +4,7 @@ mod enums;
 mod incoming_message;
 mod outgoing_message;
 mod stream;
+mod topic;
 mod url;
 
 pub use api::*;
@@ -12,6 +13,7 @@ pub use enums::*;
 pub use incoming_message::*;
 pub use outgoing_message::*;
 pub use stream::*;
+pub use topic::*;
 pub use url::{
     HEADER_REFERER, HEADER_X_BAPI_API_KEY, HEADER_X_BAPI_SIGN, HEADER_X_BAPI_TIMESTAMP,
     HEADER_X_REFERER, PATH_PRIVATE, PATH_PUBLIC_INVERSE, PATH_PUBLIC_LINEAR, PATH_PUBLIC_OPTION,

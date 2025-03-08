@@ -21,3 +21,4 @@ run: ## Run project in Docker containers.
 	@. ./env.sh &&	docker compose up -d --build --remove-orphans
 
 all: format lint test run ## Run commands: format, lint, test, run.
+	@echo "Formatting, linting, testing and running project in Docker containers completed."
