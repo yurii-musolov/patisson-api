@@ -1,5 +1,6 @@
 mod api;
 mod client;
+mod common;
 mod enums;
 mod incoming_message;
 mod outgoing_message;

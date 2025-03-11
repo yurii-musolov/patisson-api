@@ -1,5 +1,8 @@
 use serde::Deserialize;
-use serde_aux::prelude::{deserialize_number_from_string, deserialize_option_number_from_string};
+use serde_aux::prelude::{
+    deserialize_number_from_string as number,
+    deserialize_option_number_from_string as option_number,
+};
 
 use crate::{Interval, Side, TickDirection};
 
@@ -61,7 +64,7 @@ pub enum TickerMsg {
     #[serde(rename = "snapshot")]
     Snapshot {
         topic: String,
-        #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+        #[serde(default, deserialize_with = "option_number")]
         cs: Option<u64>,
         ts: u64,
         data: TickerSnapshotMsg,
@@ -69,7 +72,7 @@ pub enum TickerMsg {
     #[serde(rename = "delta")]
     Delta {
         topic: String,
-        #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+        #[serde(default, deserialize_with = "option_number")]
         cs: Option<u64>,
         ts: u64,
         data: TickerDeltaMsg,
@@ -81,54 +84,54 @@ pub enum TickerMsg {
 pub struct TickerSnapshotMsg {
     pub symbol: String,
     pub tick_direction: TickDirection,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub last_price: f64,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub pre_open_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub pre_qty: Option<f64>,
     pub cur_pre_listing_phase: Option<String>,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub prev_price24h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub price24h_pcnt: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub high_price24h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub low_price24h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub prev_price1h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub mark_price: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub index_price: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub open_interest: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub open_interest_value: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub turnover24h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub volume24h: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub funding_rate: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub next_funding_time: u64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub bid1_price: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub bid1_size: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub ask1_price: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub ask1_size: f64,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub delivery_time: Option<u64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub basis_rate: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub delivery_fee_rate: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub predicted_delivery_price: Option<f64>,
 }
 
@@ -137,54 +140,54 @@ pub struct TickerSnapshotMsg {
 pub struct TickerDeltaMsg {
     pub symbol: String,
     pub tick_direction: Option<TickDirection>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub last_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub pre_open_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub pre_qty: Option<f64>,
     pub cur_pre_listing_phase: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub prev_price24h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub price24h_pcnt: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub high_price24h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub low_price24h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub prev_price1h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub mark_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub index_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub open_interest: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub open_interest_value: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub turnover24h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub volume24h: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub funding_rate: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub next_funding_time: Option<u64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub bid1_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub bid1_size: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub ask1_price: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub ask1_size: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub delivery_time: Option<u64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub basis_rate: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub delivery_fee_rate: Option<f64>,
-    #[serde(default, deserialize_with = "deserialize_option_number_from_string")]
+    #[serde(default, deserialize_with = "option_number")]
     pub predicted_delivery_price: Option<f64>,
 }
 
@@ -208,9 +211,9 @@ pub struct TradeSnapshotMsg {
     pub symbol: String,
     #[serde(rename = "S")]
     pub side: Side,
-    #[serde(rename = "v", deserialize_with = "deserialize_number_from_string")]
+    #[serde(rename = "v", deserialize_with = "number")]
     pub size: f64,
-    #[serde(rename = "p", deserialize_with = "deserialize_number_from_string")]
+    #[serde(rename = "p", deserialize_with = "number")]
     pub price: f64,
     #[serde(rename = "L")]
     pub tick_direction: TickDirection,
@@ -246,17 +249,17 @@ pub struct KLineSnapshotMsg {
     pub start: u64,
     pub end: u64,
     pub interval: Interval,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub open: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub close: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub high: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub low: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub volume: f64,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
+    #[serde(deserialize_with = "number")]
     pub turnover: f64,
     pub confirm: bool,
     pub timestamp: u64,
@@ -281,25 +284,22 @@ pub struct AllLiquidationSnapshotMsg {
     pub symbol: String,
     #[serde(rename = "S")]
     pub side: Side, // When you receive a Buy update, this means that a long position has been liquidated
-    #[serde(rename = "v", deserialize_with = "deserialize_number_from_string")]
+    #[serde(rename = "v", deserialize_with = "number")]
     pub size: f64,
-    #[serde(rename = "p", deserialize_with = "deserialize_number_from_string")]
+    #[serde(rename = "p", deserialize_with = "number")]
     pub price: f64,
-}
-
-#[inline]
-pub fn deserialize_incoming_message_slice(message: &[u8]) -> serde_json::Result<IncomingMessage> {
-    serde_json::from_slice(message)
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::common::deserialize_slice;
+
     use super::*;
 
     #[test]
     fn deserialize_incoming_message_command_subscribe() {
         let json = r#"{"success":true,"ret_msg":"","conn_id":"c0c928a4-daab-460d-b186-45e90a10a3d4","req_id":"","op":"subscribe"}"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::Command(CommandMsg::Subscribe {
             req_id: Some(String::new()),
             ret_msg: Some(String::new()),
@@ -312,7 +312,7 @@ mod tests {
     #[test]
     fn deserialize_incoming_message_command_unsubscribe() {
         let json = r#"{"success":true,"ret_msg":"","conn_id":"c0c928a4-daab-460d-b186-45e90a10a3d4","req_id":"","op":"unsubscribe"}"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::Command(CommandMsg::Unsubscribe {
             req_id: Some(String::new()),
             ret_msg: Some(String::new()),
@@ -342,7 +342,7 @@ mod tests {
 		    "cs": 195377749067,
 		    "ts": 1718995014034
 		}"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::Ticker(TickerMsg::Delta {
             topic: String::from("tickers.BTCUSDT"),
             cs: Some(195377749067),
@@ -414,7 +414,7 @@ mod tests {
 		    "cs": 337149693308,
 		    "ts": 1740622194359
 		}"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::Ticker(TickerMsg::Snapshot {
             topic: String::from("tickers.BTCUSDT"),
             cs: Some(337149693308),
@@ -472,7 +472,7 @@ mod tests {
                 }
             ]
         }"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::Trade(TradeMsg::Snapshot {
             id: None,
             topic: String::from("publicTrade.BTCUSDT"),
@@ -513,7 +513,7 @@ mod tests {
                 }
             ]
         }"#;
-        let message = deserialize_incoming_message_slice(json.as_bytes()).unwrap();
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
         let expected = IncomingMessage::AllLiquidation(AllLiquidationMsg::Snapshot {
             topic: String::from("allLiquidation.BTCUSDT"),
             ts: 1741450605553,

@@ -11,8 +11,8 @@ use tokio_tungstenite::{
 };
 
 use crate::{
-    deserialize_incoming_message_slice, serialize_outgoing_message, IncomingMessage,
-    OutgoingMessage,
+    common::{deserialize_slice, serialize},
+    IncomingMessage, OutgoingMessage,
 };
 
 pub async fn stream_async(
@@ -45,7 +45,7 @@ pub async fn stream_async(
             match result {
                 Ok(message) => match message {
                     Message::Text(slice) => {
-                        match deserialize_incoming_message_slice(slice.as_ref()) {
+                        match deserialize_slice(slice.as_ref()) {
                             Ok(message) => {
                                 if let Err(e) = incoming_tx.send(message).await {
                                     println!("[bybit.stream.incoming] Send IncomingMessage failed with: {e}!");
@@ -88,7 +88,7 @@ pub async fn stream_async(
 
     tokio::spawn(async move {
         while let Some(message) = outgoing_rx.recv().await {
-            let message = match serialize_outgoing_message(&message) {
+            let message = match serialize(&message) {
                 Ok(serialized) => Message::Text(Utf8Bytes::from(&serialized)),
                 Err(e) => {
                     println!("[bybit.stream.outgoing] Serialize OutgoingMessage failed with {e}!");

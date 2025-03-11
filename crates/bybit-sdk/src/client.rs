@@ -1,9 +1,7 @@
 use reqwest::{self, Client as RClient, Method};
 
 use crate::{
-    api::{GetKLinesParams, GetTickersParams, KLine, Response, Ticker},
-    url::{PATH_MARKET_KLINE, PATH_MARKET_RECENT_TRADE, PATH_MARKET_TICKERS},
-    GetTradesParams, Trade,
+    api::{GetKLinesParams, GetTickersParams, KLine, Response, Ticker}, url::{PATH_MARKET_INSTRUMENTS_INFO, PATH_MARKET_KLINE, PATH_MARKET_RECENT_TRADE, PATH_MARKET_TICKERS}, GetInstrumentsInfoParams, GetTradesParams, InstrumentsInfo, Trade
 };
 
 #[derive(Clone)]
@@ -21,6 +19,21 @@ impl<'a> Client<'a> {
         params: GetKLinesParams,
     ) -> Result<Response<KLine>, Box<dyn std::error::Error>> {
         let url = format!("{}{}", self.base_url, PATH_MARKET_KLINE);
+
+        let client = RClient::builder().build()?;
+        let request_builder = client.request(Method::GET, url).query(&params);
+
+        let response = request_builder.send().await?;
+        let res = response.json().await?;
+
+        Ok(res)
+    }
+
+    pub async fn get_instruments_info(
+        &self,
+        params: GetInstrumentsInfoParams,
+    ) -> Result<Response<InstrumentsInfo>, Box<dyn std::error::Error>> {
+        let url = format!("{}{}", self.base_url, PATH_MARKET_INSTRUMENTS_INFO);
 
         let client = RClient::builder().build()?;
         let request_builder = client.request(Method::GET, url).query(&params);

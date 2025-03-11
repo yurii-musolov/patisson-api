@@ -3,7 +3,7 @@ use std::fmt;
 
 // Unified Account: spot | linear | inverse | option
 // Classic Account: linear | inverse | spot
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub enum Category {
     #[serde(rename = "inverse")]
     Inverse, // Inverse contract, including Inverse perp, Inverse futures.
@@ -144,4 +144,39 @@ impl AccountType {
 pub enum Side {
     Buy,
     Sell,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub enum ContractType {
+    InversePerpetual,
+    LinearPerpetual,
+    LinearFutures, // USDT/USDC Futures
+    InverseFutures,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub enum Status {
+    PreLaunch,
+    Trading,
+    Delivering,
+    Closed,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub enum CurAuctionPhase {
+    NotStarted,
+    Finished,
+    CallAuction,
+    CallAuctionNoCancel,
+    CrossMatching,
+    ContinuousTrading,
+}
+
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum CopyTrading {
+    None,
+    Both,
+    UtaOnly,
+    NormalOnly,
 }
