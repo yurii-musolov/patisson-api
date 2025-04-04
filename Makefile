@@ -13,6 +13,9 @@ lint: ## Lint project.
 test: ## Test project.
 	@cargo test --quiet --workspace
 
+bench: ## Run benches of project.
+	@cargo bench
+
 env: ## Set environment variables.
 	@. ./env.sh
 	@echo "Environment variables are set."
