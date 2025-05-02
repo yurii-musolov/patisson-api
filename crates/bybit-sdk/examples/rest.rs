@@ -8,7 +8,7 @@ use tokio;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let category = Category::Linear;
     let symbol = String::from("BTCUSDT");
-    let linear_client = Client::new(URL_BASE_API_MAINNET_1);
+    let linear_client = Client::new(URL_BASE_API_MAINNET_1.to_string());
 
     let response = linear_client
         .get_kline(GetKLinesParams {

@@ -24,7 +24,6 @@ pub enum OutgoingMessage {
     Pong { req_id: Option<String> },
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::common::serialize;

@@ -4,9 +4,13 @@ use serde_aux::prelude::{
     deserialize_option_number_from_string as option_number,
 };
 
-use crate::{Category, ContractType, CopyTrading, CurAuctionPhase, Interval, Side, Status};
+use crate::{
+    CancelType, Category, ContractType, CopyTrading, CreateType, CurAuctionPhase, Innovation,
+    Interval, OcoTriggerBy, OrderStatus, OrderType, Pair, PlaceType, PositionIdx, RejectReason,
+    Side, SmpType, Status, StopOrderType, TimeInForce, TpslMode, TriggerBy, TriggerDirection,
+};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub struct Response<T> {
     #[serde(rename = "retCode")]
     pub ret_code: i32,
@@ -18,7 +22,7 @@ pub struct Response<T> {
     pub ret_ext_info: RetExtInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq)]
 pub struct RetExtInfo {}
 
 #[derive(Serialize)]
@@ -78,7 +82,7 @@ pub enum InstrumentsInfo {
     #[serde(rename = "inverse", rename_all = "camelCase")]
     Inverse {
         next_page_cursor: String,
-        list: Vec<AllCategoriesInstrumentsInfo>,
+        list: Vec<AllCategoriesInstrumentsInfo>, // TODO: Rename AllCategoriesInstrumentsInfo to InverseLinearInstrumentsInfo.
     },
     #[serde(rename = "linear", rename_all = "camelCase")]
     Linear {
@@ -88,12 +92,12 @@ pub enum InstrumentsInfo {
     #[serde(rename = "option", rename_all = "camelCase")]
     Option {
         next_page_cursor: String,
-        list: Vec<AllCategoriesInstrumentsInfo>,
+        list: Vec<AllCategoriesInstrumentsInfo>, // TODO: Rewrite this.
     },
     #[serde(rename = "spot", rename_all = "camelCase")]
     Spot {
-        next_page_cursor: String,
-        list: Vec<AllCategoriesInstrumentsInfo>,
+        next_page_cursor: Option<String>,
+        list: Vec<SpotInstrumentsInfo>,
     },
 }
 
@@ -131,6 +135,23 @@ pub struct AllCategoriesInstrumentsInfo {
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
+pub struct SpotInstrumentsInfo {
+    pub symbol: String,         // Symbol name
+    pub base_coin: String,      // Base coin
+    pub quote_coin: String,     // Quote coin
+    pub innovation: Innovation, // Whether or not this is an innovation zone token. 0: false, 1: true
+    pub status: Status,         // Instrument status
+    pub margin_trading: String, // Margin trade symbol or not
+    // This is to identify if the symbol support margin trading under different account modes
+    // You may find some symbols not supporting margin buy or margin sell, so you need to go to Collateral Info (UTA) to check if that coin is borrowable
+    pub st_tag: String, // Whether or not it has an special treatment label. 0: false, 1: true
+    pub lot_size_filter: SpotLotSizeFilter, // Size attributes
+    pub price_filter: SpotPriceFilter, // Price attributes
+    pub risk_parameters: RiskParameters, // Risk parameters for limit order price, refer to announcement
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct LeverageFilter {
     #[serde(deserialize_with = "number")]
     pub min_leverage: f64,
@@ -153,6 +174,13 @@ pub struct PriceFilter {
 
 #[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
+pub struct SpotPriceFilter {
+    #[serde(deserialize_with = "number")]
+    pub tick_size: f64, // The step to increase/reduce order price
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct LotSizeFilter {
     #[serde(deserialize_with = "number")]
     pub min_notional_value: f64,
@@ -166,6 +194,23 @@ pub struct LotSizeFilter {
     pub qty_step: f64,
     #[serde(deserialize_with = "number")]
     pub post_only_max_order_qty: f64,
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SpotLotSizeFilter {
+    #[serde(deserialize_with = "number")]
+    pub base_precision: f64, // The precision of base coin
+    #[serde(deserialize_with = "number")]
+    pub quote_precision: f64, // The precision of quote coin
+    #[serde(deserialize_with = "number")]
+    pub min_order_qty: f64, // Minimum order quantity
+    #[serde(deserialize_with = "number")]
+    pub max_order_qty: f64, // Maximum order quantity
+    #[serde(deserialize_with = "number")]
+    pub min_order_amt: f64, // Minimum order amount
+    #[serde(deserialize_with = "number")]
+    pub max_order_amt: f64, // Maximum order amount
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -433,6 +478,105 @@ pub struct OptionTrade {
     pub iv: f64,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Order {
+    pub order_id: String,       // Order ID
+    pub order_link_id: String,  // User customised order ID
+    pub block_trade_id: String, // Paradigm block trade ID
+    pub symbol: String,         // Symbol name
+    #[serde(deserialize_with = "number")]
+    pub price: f64, // Order price
+    #[serde(deserialize_with = "number")]
+    pub qty: f64, // Order qty
+    pub side: Side,             // Side. Buy,Sell
+    pub is_leverage: bool, // Whether to borrow. Unified spot only. 0: false, 1: true. Classic spot is not supported, always 0
+    pub position_idx: PositionIdx, // Position index. Used to identify positions in different position modes.
+    pub order_status: OrderStatus, // Order status
+    pub create_type: Option<CreateType>, // Order create type
+    // Only for category=linear or inverse
+    // Spot, Option do not have this key
+    pub cancel_type: CancelType,     // Cancel type
+    pub reject_reason: RejectReason, // Reject reason. Classic spot is not supported
+    pub avg_price: String,           // Average filled price
+    // UTA: returns "" for those orders without avg price
+    // classic account: returns "0" for those orders without avg price, and also for those orders have partilly filled but cancelled at the end
+    #[serde(deserialize_with = "number")]
+    pub leaves_qty: f64, // The remaining qty not executed. Classic spot is not supported
+    #[serde(deserialize_with = "number")]
+    pub leaves_value: f64, // The estimated value not executed. Classic spot is not supported
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_qty: f64, // Cumulative executed order qty
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_value: f64, // Cumulative executed order value. Classic spot is not supported
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_fee: f64, // Cumulative executed trading fee. Classic spot is not supported
+    pub time_in_force: TimeInForce,     // Time in force
+    pub order_type: OrderType, // Order type. Market,Limit. For TP/SL order, it means the order type after triggered
+    pub stop_order_type: StopOrderType, // Stop order type
+    pub order_iv: String,      // Implied volatility
+    pub market_unit: String, // The unit for qty when create Spot market orders for UTA account. baseCoin, quoteCoin
+    #[serde(deserialize_with = "number")]
+    pub trigger_price: f64, // Trigger price. If stopOrderType=TrailingStop, it is activate price. Otherwise, it is trigger price
+    #[serde(deserialize_with = "number")]
+    pub take_profit: f64, // Take profit price
+    #[serde(deserialize_with = "number")]
+    pub stop_loss: f64, // Stop loss price
+    pub tpsl_mode: Option<TpslMode>, // TP/SL mode, Full: entire position for TP/SL. Partial: partial position tp/sl. Spot does not have this field, and Option returns always ""
+    pub oco_trigger_by: OcoTriggerBy, // The trigger type of Spot OCO order.OcoTriggerByUnknown, OcoTriggerByTp, OcoTriggerByBySl. Classic spot is not supported
+    #[serde(deserialize_with = "number")]
+    pub tp_limit_price: f64, // The limit order price when take profit price is triggered
+    #[serde(deserialize_with = "number")]
+    pub sl_limit_price: f64, // The limit order price when stop loss price is triggered
+    pub tp_trigger_by: TriggerBy,     // The price type to trigger take profit
+    pub sl_trigger_by: TriggerBy,     // The price type to trigger stop loss
+    pub trigger_direction: TriggerDirection, // Trigger direction. 1: rise, 2: fall
+    pub trigger_by: TriggerBy,        // The price type of trigger price
+    #[serde(deserialize_with = "number")]
+    pub last_price_on_created: f64, // Last price when place the order, Spot is not applicable
+    #[serde(deserialize_with = "number")]
+    pub base_price: f64, // Last price when place the order, Spot has this field only
+    pub reduce_only: bool,            // Reduce only. true means reduce position size
+    pub close_on_trigger: bool,       // Close on trigger. What is a close on trigger order?
+    pub place_type: PlaceType,        // Place type, option used. iv, price
+    pub smp_type: SmpType,            // SMP execution type
+    #[serde(deserialize_with = "number")]
+    pub smp_group: i64, // Smp group ID. If the UID has no group, it is 0 by default
+    pub smp_order_id: String, // The counterparty's orderID which triggers this SMP execution
+    pub created_time: String, // Order created timestamp (ms)
+    pub updated_time: String, // Order updated timestamp (ms)
+}
+
+impl Order {
+    pub fn is_open_status(&self) -> bool {
+        self.order_status.is_open()
+    }
+    pub fn is_closed_status(&self) -> bool {
+        self.order_status.is_closed()
+    }
+}
+
+pub fn spot_fee_currency(side: Side, is_maker_order: bool, maker_fee_rate: f64) -> Pair {
+    if maker_fee_rate >= 0.0 {
+        match side {
+            Side::Buy => Pair::Base,
+            Side::Sell => Pair::Quote,
+        }
+    } else {
+        if is_maker_order {
+            match side {
+                Side::Buy => Pair::Quote,
+                Side::Sell => Pair::Base,
+            }
+        } else {
+            match side {
+                Side::Buy => Pair::Base,
+                Side::Sell => Pair::Quote,
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::common::deserialize_slice;
@@ -440,7 +584,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn deserialize_incoming_message_instruments_info_trading() {
+    fn deserialize_incoming_message_instruments_info_trading_linear() {
         // Official USDT Perpetual instrument structure
         let json = r#"{
             "category": "linear",
@@ -533,6 +677,79 @@ mod tests {
                 is_pre_listing: false,
                 pre_listing_info: None,
             }],
+        };
+        assert_eq!(message, expected);
+    }
+
+    #[test]
+    fn deserialize_incoming_message_instruments_info_trading_spot() {
+        // Spot
+        let json = r#"{
+            "retCode": 0,
+            "retMsg": "OK",
+            "result": {
+                "category": "spot",
+                "list": [
+                {
+                    "symbol": "BTCUSDT",
+                    "baseCoin": "BTC",
+                    "quoteCoin": "USDT",
+                    "innovation": "0",
+                    "status": "Trading",
+                    "marginTrading": "utaOnly",
+                    "stTag": "0",
+                    "lotSizeFilter": {
+                        "basePrecision": "0.000001",
+                        "quotePrecision": "0.0000001",
+                        "minOrderQty": "0.000011",
+                        "maxOrderQty": "83",
+                        "minOrderAmt": "5",
+                        "maxOrderAmt": "8000000"
+                    },
+                    "priceFilter": {
+                        "tickSize": "0.1"
+                    },
+                    "riskParameters": {
+                        "priceLimitRatioX": "0.01",
+                        "priceLimitRatioY": "0.02"
+                    }
+                }
+                ]
+            },
+            "retExtInfo": {},
+            "time": 1746213108077
+        }"#;
+        let message: Response<InstrumentsInfo> = deserialize_slice(json.as_bytes()).unwrap();
+        let expected = Response {
+            ret_code: 0,
+            ret_msg: String::from("OK"),
+            result: InstrumentsInfo::Spot {
+                next_page_cursor: None,
+                list: vec![SpotInstrumentsInfo {
+                    symbol: String::from("BTCUSDT"),
+                    status: Status::Trading,
+                    base_coin: String::from("BTC"),
+                    quote_coin: String::from("USDT"),
+                    risk_parameters: RiskParameters {
+                        price_limit_ratio_x: 0.01,
+                        price_limit_ratio_y: 0.02,
+                    },
+                    innovation: Innovation::False,
+                    margin_trading: String::from("utaOnly"), // TODO: Rewrite.
+                    st_tag: String::from("0"),               // TODO: Rewrite.
+                    lot_size_filter: SpotLotSizeFilter {
+                        base_precision: 0.000001,
+                        quote_precision: 0.0000001,
+                        min_order_qty: 0.000011,
+                        max_order_qty: 83.0,
+                        min_order_amt: 5.0,
+                        max_order_amt: 8000000.0,
+                    },
+                    price_filter: SpotPriceFilter { tick_size: 0.1 },
+                }],
+            },
+            time: 1746213108077,
+            ret_ext_info: RetExtInfo {},
         };
         assert_eq!(message, expected);
     }

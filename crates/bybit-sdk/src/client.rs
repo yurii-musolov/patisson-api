@@ -1,16 +1,21 @@
 use reqwest::{self, Client as RClient, Method};
 
 use crate::{
-    api::{GetKLinesParams, GetTickersParams, KLine, Response, Ticker}, url::{PATH_MARKET_INSTRUMENTS_INFO, PATH_MARKET_KLINE, PATH_MARKET_RECENT_TRADE, PATH_MARKET_TICKERS}, GetInstrumentsInfoParams, GetTradesParams, InstrumentsInfo, Trade
+    api::{GetKLinesParams, GetTickersParams, KLine, Response, Ticker},
+    url::{
+        PATH_MARKET_INSTRUMENTS_INFO, PATH_MARKET_KLINE, PATH_MARKET_RECENT_TRADE,
+        PATH_MARKET_TICKERS,
+    },
+    GetInstrumentsInfoParams, GetTradesParams, InstrumentsInfo, Trade,
 };
 
 #[derive(Clone)]
-pub struct Client<'a> {
-    base_url: &'a str,
+pub struct Client {
+    base_url: String,
 }
 
-impl<'a> Client<'a> {
-    pub fn new(base_url: &'a str) -> Self {
+impl Client {
+    pub fn new(base_url: String) -> Self {
         Self { base_url }
     }
 
