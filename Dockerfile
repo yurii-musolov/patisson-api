@@ -4,31 +4,27 @@
 FROM rust:1.86.0 AS build
 WORKDIR /app
 COPY . ./
-RUN cargo install sqlx-cli
-RUN cargo build --all-targets
+# TODO: use target x86_64-unknown-linux-musl
+RUN cargo build --target x86_64-unknown-linux-gnu
 
 FROM debian:12.10-slim AS setup
 WORKDIR /app
-COPY --from=build /app/target/debug/auth ./
-COPY --from=build /app/target/debug/provider ./
-# TODO: copy /home/nemo/.cargo/bin/sqlx
-# https://github.com/launchbadge/sqlx/blob/main/sqlx-cli/README.md
-# TODO: remove this line
+COPY ./.docker/setup.sh ./
+COPY --from=build /app/target/x86_64-unknown-linux-gnu/debug/auth ./
 RUN apt-get update -y && apt-get install -y ca-certificates
-COPY ./.docker/migrate.sh ./
-# TODO: Use 'sqlx' in migration script './migrate.sh'
-ENTRYPOINT [ "./auth" ]
-CMD [ "migrate" ]
+ENTRYPOINT [ "bash" ]
+CMD [ "./setup.sh" ]
 
 FROM debian:12.10-slim AS auth
 WORKDIR /app
-COPY --from=build /app/target/debug/auth ./
+COPY --from=build /app/target/x86_64-unknown-linux-gnu/debug/auth ./
+RUN apt-get update -y && apt-get install -y ca-certificates
 ENTRYPOINT [ "./auth" ]
 CMD [ "serve" ]
 
 FROM debian:12.10-slim AS provider
 WORKDIR /app
-COPY --from=build /app/target/debug/provider ./
+COPY --from=build /app/target/x86_64-unknown-linux-gnu/debug/provider ./
 RUN apt-get update -y && apt-get install -y ca-certificates
 ENTRYPOINT [ "./provider" ]
 CMD [ "serve" ]

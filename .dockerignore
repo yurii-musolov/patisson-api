@@ -1,2 +1,7 @@
+/.git
+/.github
+/.postgres
 /target
+
+Dockerfile
 *.md
