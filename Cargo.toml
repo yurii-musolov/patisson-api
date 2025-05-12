@@ -8,33 +8,33 @@ edition = "2021"
 authors = ["Yurii Musolov <yurii.musolov@gmail.com>"]
 
 [workspace.dependencies]
-anyhow = "1.0.98"
-axum = { version = "0.8.4", features = ["macros", "ws"] }
-axum-extra = { version = "0.10.1", features = ["typed-header"] }
-chrono = "0.4.41"
-clap = { version = "4.5.37", features = ["derive", "env"] }
-criterion = "0.5.1"
-futures = "0.3.31"
-futures-util = { version = "0.3", default-features = false, features = [
+anyhow = "=1.0.98"
+axum = { version = "=0.8.4", features = ["macros", "ws"] }
+axum-extra = { version = "=0.10.1", features = ["typed-header"] }
+chrono = "=0.4.41"
+clap = { version = "=4.5.38", features = ["derive", "env"] }
+criterion = "=0.5.1"
+futures = "=0.3.31"
+futures-util = { version = "=0.3", default-features = false, features = [
     "sink",
     "std",
 ] }
-jsonwebtoken = "9.3.1"
-reqwest = { version = "0.12.15", features = ["json"] }
-serde = { version = "1.0.219", features = ["derive"] }
-serde-aux = "4.7.0"
-serde_json = "1.0.140"
-sha2 = "0.10.9"
-sqlx = { version = "0.8.5", features = [
+jsonwebtoken = "=9.3.1"
+reqwest = { version = "=0.12.15", features = ["json"] }
+serde = { version = "=1.0.219", features = ["derive"] }
+serde-aux = "=4.7.0"
+serde_json = "=1.0.140"
+sha2 = "=0.10.9"
+sqlx = { version = "=0.8.5", features = [
     "postgres",
     "runtime-tokio",
     "runtime-tokio-rustls",
     "time",
     "uuid",
 ] }
-tokio-util = "0.7.15"
-tokio = { version = "1.44.2", features = ["full"] }
-tokio-tungstenite = { version = "0.26.2", features = ["native-tls"] }
-tower-http = { version = "0.6.1", features = ["cors", "fs", "trace"] }
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tokio-util = "=0.7.15"
+tokio = { version = "=1.45.0", features = ["full"] }
+tokio-tungstenite = { version = "=0.26.2", features = ["native-tls"] }
+tower-http = { version = "=0.6.4", features = ["cors", "fs", "trace"] }
+tracing = "=0.1.41"
+tracing-subscriber = { version = "=0.3.19", features = ["env-filter"] }
