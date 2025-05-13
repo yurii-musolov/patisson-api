@@ -86,9 +86,9 @@ where
 {
     fn connect(
         &self,
-        token: CancellationToken,
-        receiver: mpsc::Receiver<IngoingMessage>,
-        sender: mpsc::Sender<OutgoingMessage>,
+        _token: CancellationToken,
+        _receiver: mpsc::Receiver<IngoingMessage>,
+        _sender: mpsc::Sender<OutgoingMessage>,
     ) {
         // TODO:
         // if !cancel_token.is_cancelled() {

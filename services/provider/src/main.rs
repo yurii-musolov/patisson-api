@@ -4,7 +4,6 @@ mod infrastructure;
 mod presentation;
 
 use axum::{
-    extract::State,
     http::{header::CONTENT_TYPE, HeaderValue},
     routing::{any, get},
     Router,
