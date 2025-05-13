@@ -77,7 +77,7 @@ async fn command_migrate(args: Migrate) -> anyhow::Result<()> {
 
     sqlx::migrate!().run(&pool).await?;
 
-    tracing::info!("Migration completed!");
+    tracing::info!("Migration successful!");
 
     Ok(())
 }
