@@ -10,7 +10,7 @@ use crate::{Interval, Side, TickDirection};
 #[serde(untagged)]
 pub enum IncomingMessage {
     Command(CommandMsg),
-    Ticker(TickerMsg),
+    Ticker(Box<TickerMsg>),
     Trade(TradeMsg),
     KLine(KLineMsg),
     AllLiquidation(AllLiquidationMsg),
@@ -343,7 +343,7 @@ mod tests {
 		    "ts": 1718995014034
 		}"#;
         let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
-        let expected = IncomingMessage::Ticker(TickerMsg::Delta {
+        let ticker_delta = TickerMsg::Delta {
             topic: String::from("tickers.BTCUSDT"),
             cs: Some(195377749067),
             ts: 1718995014034,
@@ -376,7 +376,8 @@ mod tests {
                 delivery_fee_rate: None,
                 predicted_delivery_price: None,
             },
-        });
+        };
+        let expected = IncomingMessage::Ticker(Box::new(ticker_delta));
         assert_eq!(message, expected);
     }
 
@@ -415,7 +416,7 @@ mod tests {
 		    "ts": 1740622194359
 		}"#;
         let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
-        let expected = IncomingMessage::Ticker(TickerMsg::Snapshot {
+        let ticker_snapshot = TickerMsg::Snapshot {
             topic: String::from("tickers.BTCUSDT"),
             cs: Some(337149693308),
             ts: 1740622194359,
@@ -448,7 +449,8 @@ mod tests {
                 delivery_fee_rate: None,
                 predicted_delivery_price: None,
             },
-        });
+        };
+        let expected = IncomingMessage::Ticker(Box::new(ticker_snapshot));
         assert_eq!(message, expected);
     }
 

@@ -562,17 +562,15 @@ pub fn spot_fee_currency(side: Side, is_maker_order: bool, maker_fee_rate: f64) 
             Side::Buy => Pair::Base,
             Side::Sell => Pair::Quote,
         }
+    } else if is_maker_order {
+        match side {
+            Side::Buy => Pair::Quote,
+            Side::Sell => Pair::Base,
+        }
     } else {
-        if is_maker_order {
-            match side {
-                Side::Buy => Pair::Quote,
-                Side::Sell => Pair::Base,
-            }
-        } else {
-            match side {
-                Side::Buy => Pair::Base,
-                Side::Sell => Pair::Quote,
-            }
+        match side {
+            Side::Buy => Pair::Base,
+            Side::Sell => Pair::Quote,
         }
     }
 }

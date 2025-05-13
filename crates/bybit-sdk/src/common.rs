@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[inline]
 pub fn deserialize_slice<'a, T>(message: &'a [u8]) -> serde_json::Result<T>
 where
-    T: ?Sized + Deserialize<'a>,
+    T: Deserialize<'a>,
 {
     serde_json::from_slice(message)
 }
