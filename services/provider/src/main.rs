@@ -1,13 +1,16 @@
 mod application;
+mod common;
 mod infrastructure;
 mod presentation;
 
 use axum::{
+    extract::State,
     http::{header::CONTENT_TYPE, HeaderValue},
-    routing::get,
+    routing::{any, get},
     Router,
 };
 use clap::Parser;
+use std::sync::Arc;
 use tower_http::{
     cors::CorsLayer,
     trace::{DefaultMakeSpan, TraceLayer},
@@ -18,10 +21,9 @@ use bybit_sdk::{Client as BybitClient, URL_BASE_API_MAINNET_1};
 
 use application::Application;
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
-use presentation::{get_candles, get_symbols, get_trades, Command, Serve};
+use presentation::{get_candles, get_symbols, get_trades, websocket_handler, Command, Serve};
 
-type App<'a> =
-    Application<BinanceExchange, BingXExchange, BybitExchange<'a>, KrakenExchange, MEXCExchange>;
+type App = Application<BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -44,7 +46,7 @@ async fn main() -> anyhow::Result<()> {
 async fn command_serve(args: Serve) -> anyhow::Result<()> {
     tracing::info!("CLI command: Serve, args: {:?}", args);
 
-    let client_bybit = BybitClient::new(URL_BASE_API_MAINNET_1);
+    let client_bybit = BybitClient::new(URL_BASE_API_MAINNET_1.to_string());
 
     let binance = BinanceExchange::new();
     let bingx = BingXExchange::new();
@@ -53,8 +55,9 @@ async fn command_serve(args: Serve) -> anyhow::Result<()> {
     let mexc = MEXCExchange::new();
 
     let application = Application::new(binance, bingx, bybit, kraken, mexc);
+    let application = Arc::new(application);
 
-    let router = Router::new()
+    let v1 = Router::new()
         .route("/symbols/{exchange}/{schema}", get(get_symbols::<App>))
         .route(
             "/candles/{exchange}/{schema}/{symbol}/{interval}",
@@ -64,6 +67,10 @@ async fn command_serve(args: Serve) -> anyhow::Result<()> {
             "/trades/{exchange}/{schema}/{symbol}",
             get(get_trades::<App>),
         )
+        .route("/websocket", any(websocket_handler::<App>));
+
+    let router = Router::new()
+        .nest("/v1", v1)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::default().include_headers(true)),

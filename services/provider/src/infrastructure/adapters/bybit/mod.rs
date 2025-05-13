@@ -12,18 +12,17 @@ use map::{
     from_option_trade, from_spot_ticker, to_category, to_interval,
 };
 
-#[derive(Clone)]
-pub struct BybitExchange<'a> {
-    client: Client<'a>,
+pub struct BybitExchange {
+    client: Client,
 }
 
-impl<'a> BybitExchange<'a> {
-    pub fn new(client: Client<'a>) -> Self {
+impl BybitExchange {
+    pub fn new(client: Client) -> Self {
         Self { client }
     }
 }
 
-impl Exchanger for BybitExchange<'_> {
+impl Exchanger for BybitExchange {
     async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol> {
         let result = self
             .client

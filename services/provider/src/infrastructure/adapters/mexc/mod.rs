@@ -2,7 +2,6 @@ use crate::application::{
     Candle, Exchanger, GetCandlesParams, GetTradesParams, Schema, Symbol, Trade,
 };
 
-#[derive(Clone)]
 pub struct MEXCExchange {}
 
 impl MEXCExchange {

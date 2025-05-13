@@ -1,14 +1,27 @@
-use std::sync::Arc;
+use std::sync::mpsc;
+use tokio_util::sync::CancellationToken;
+
+// TODO: Remove import.
+use crate::presentation::{IngoingMessage, OutgoingMessage};
 
 use super::{Candle, Exchange, Interval, Schema, Symbol, Trade};
 
-pub trait Exchanger: Send + Sync {
+pub trait Exchanger {
     async fn get_symbols(&self, schema: Schema, symbol: Option<String>) -> Vec<Symbol>;
     async fn get_candles(&self, schema: Schema, params: GetCandlesParams) -> Vec<Candle>;
     async fn get_trades(&self, schema: Schema, params: GetTradesParams) -> Vec<Trade>;
 }
 
-pub trait IApp: Send + Sync {
+// This trait is required for 'axum'.
+// Placed here to avoid dependency on 'presentation'.
+pub trait IApp {
+    fn connect(
+        &self,
+        token: CancellationToken,
+        receiver: mpsc::Receiver<IngoingMessage>,
+        sender: mpsc::Sender<OutgoingMessage>,
+    );
+
     async fn get_symbols(
         &self,
         exchange: Exchange,
@@ -29,7 +42,6 @@ pub trait IApp: Send + Sync {
     ) -> Vec<Trade>;
 }
 
-#[derive(Clone)]
 pub struct Application<E1, E2, E3, E4, E5>
 where
     E1: Exchanger,
@@ -38,11 +50,11 @@ where
     E4: Exchanger,
     E5: Exchanger,
 {
-    binance: Arc<E1>,
-    bingx: Arc<E2>,
-    bybit: Arc<E3>,
-    kraken: Arc<E4>,
-    mexc: Arc<E5>,
+    binance: E1,
+    bingx: E2,
+    bybit: E3,
+    kraken: E4,
+    mexc: E5,
 }
 
 impl<E1, E2, E3, E4, E5> Application<E1, E2, E3, E4, E5>
@@ -55,11 +67,11 @@ where
 {
     pub fn new(binance: E1, bingx: E2, bybit: E3, kraken: E4, mexc: E5) -> Self {
         Self {
-            binance: Arc::new(binance),
-            bingx: Arc::new(bingx),
-            bybit: Arc::new(bybit),
-            kraken: Arc::new(kraken),
-            mexc: Arc::new(mexc),
+            binance,
+            bingx,
+            bybit,
+            kraken,
+            mexc,
         }
     }
 }
@@ -72,6 +84,19 @@ where
     E4: Exchanger,
     E5: Exchanger,
 {
+    fn connect(
+        &self,
+        token: CancellationToken,
+        receiver: mpsc::Receiver<IngoingMessage>,
+        sender: mpsc::Sender<OutgoingMessage>,
+    ) {
+        // TODO:
+        // if !cancel_token.is_cancelled() {
+        //     cancel_token.cancel();
+        // }
+        // token.cancel();
+    }
+
     async fn get_symbols(
         &self,
         exchange: Exchange,
@@ -86,6 +111,7 @@ where
             Exchange::Mexc => self.mexc.get_symbols(schema, symbol).await,
         }
     }
+
     async fn get_candles(
         &self,
         exchange: Exchange,

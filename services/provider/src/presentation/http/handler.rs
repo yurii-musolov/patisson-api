@@ -3,6 +3,7 @@ use axum::{
     http::StatusCode,
     Json,
 };
+use std::sync::Arc;
 
 use crate::{
     application::{GetCandlesParams, GetTradesParams, IApp},
@@ -14,7 +15,7 @@ use crate::{
 };
 
 pub async fn get_symbols<T>(
-    State(application): State<T>,
+    State(application): State<Arc<T>>,
     Path((exchange, schema)): Path<(APIExchange, APISchema)>,
     Query(params): Query<GetSymbolsQuery>,
 ) -> Result<Json<Vec<APISymbol>>, StatusCode>
@@ -39,7 +40,7 @@ where
 pub async fn get_candles<T>(
     Path((exchange, schema, symbol, interval)): Path<(APIExchange, APISchema, String, String)>,
     Query(query): Query<GetCandlesQuery>,
-    State(application): State<T>,
+    State(application): State<Arc<T>>,
 ) -> Result<Json<Vec<APICandle>>, StatusCode>
 where
     T: IApp,
@@ -69,7 +70,7 @@ where
 pub async fn get_trades<T>(
     Path((exchange, schema, symbol)): Path<(APIExchange, APISchema, String)>,
     Query(query): Query<GetTradesQuery>,
-    State(application): State<T>,
+    State(application): State<Arc<T>>,
 ) -> Result<Json<Vec<APITrade>>, StatusCode>
 where
     T: IApp,
