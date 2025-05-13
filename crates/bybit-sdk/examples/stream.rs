@@ -122,7 +122,7 @@ fn print(message: IncomingMessage) {
             } => {}
             _ => println!("{message:?}"),
         },
-        IncomingMessage::Ticker(message) => match message {
+        IncomingMessage::Ticker(message) => match *message {
             TickerMsg::Snapshot {
                 topic: _,
                 cs: _,
