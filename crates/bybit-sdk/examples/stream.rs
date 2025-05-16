@@ -159,5 +159,6 @@ fn print(message: IncomingMessage) {
             } => println!("{data:?}"),
         },
         IncomingMessage::Order(message) => println!("{message:?}"),
+        IncomingMessage::Position(message) => println!("{message:?}"),
     }
 }
