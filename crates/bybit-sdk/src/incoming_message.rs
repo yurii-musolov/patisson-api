@@ -5,9 +5,10 @@ use serde_aux::prelude::{
 };
 
 use crate::{
-    CancelType, Category, CreateType, Interval, OcoTriggerBy, OrderStatus, OrderType, PlaceType,
-    PositionIdx, RejectReason, Side, SlippageToleranceType, SmpType, StopOrderType, TickDirection,
-    TimeInForce, TpslMode, TriggerBy, TriggerDirection,
+    AutoAddMargin, CancelType, Category, CreateType, Interval, OcoTriggerBy, OrderStatus,
+    OrderType, PlaceType, PositionIdx, PositionStatus, RejectReason, Side, SlippageToleranceType,
+    SmpType, StopOrderType, TickDirection, TimeInForce, TpslMode, TradeMode, TriggerBy,
+    TriggerDirection,
 };
 
 #[derive(PartialEq, Deserialize, Debug)]
@@ -19,6 +20,7 @@ pub enum IncomingMessage {
     KLine(KLineMsg),
     AllLiquidation(AllLiquidationMsg),
     Order(OrderMsg),
+    Position(PositionMsg),
 }
 
 #[derive(PartialEq, Deserialize, Debug)]
@@ -439,6 +441,157 @@ pub struct OrderUpdateMsg {
     pub updated_time: u64,
 }
 
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionMsg {
+    /// Message ID
+    id: String,
+    /// Topic name
+    topic: String,
+    /// Data created timestamp (ms)
+    creation_time: u64,
+    data: Vec<PositionUpdateMsg>,
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionUpdateMsg {
+    /// Product type
+    pub category: Category,
+    /// Symbol name
+    pub symbol: String,
+    /// Position side. Buy: long, Sell: short
+    /// one-way mode: classic & UTA1.0(inverse), an empty position returns None.
+    /// UTA2.0(linear, inverse) & UTA1.0(linear): either one-way or hedge mode returns an empty string "" for an empty position.
+    // pub side: Option<Side>,
+    /// Position size
+    #[serde(deserialize_with = "number")]
+    pub size: f64,
+    /// Used to identify positions in different position modes
+    pub position_idx: PositionIdx,
+    /// Trade mode
+    /// Classic & UTA1.0(inverse): 0: cross-margin, 1: isolated margin
+    /// UTA2.0, UTA1.0(execpt inverse): deprecated, always 0, check Get Account Info to know the margin mode
+    pub trade_mode: TradeMode,
+    /// Position value
+    #[serde(deserialize_with = "number")]
+    pub position_value: f64,
+    /// Risk tier ID
+    /// for portfolio margin mode, this field returns 0, which means risk limit rules are invalid
+    #[serde(deserialize_with = "number")]
+    pub risk_id: i64,
+    /// Risk limit value
+    /// for portfolio margin mode, this field returns 0, which means risk limit rules are invalid
+    #[serde(deserialize_with = "number")]
+    pub risk_limit_value: f64,
+    /// Entry price
+    #[serde(deserialize_with = "number")]
+    pub entry_price: f64,
+    /// Mark price
+    #[serde(deserialize_with = "number")]
+    pub mark_price: f64,
+    /// Position leverage
+    /// for portfolio margin mode, this field returns "", which means leverage rules are invalid
+    #[serde(deserialize_with = "number")]
+    pub leverage: f64,
+    /// Position margin
+    /// Classic & UTA1.0(inverse) can refer to this field to get the position initial margin
+    #[serde(deserialize_with = "number")]
+    pub position_balance: f64,
+    /// Whether to add margin automatically. 0: false, 1: true. For UTA, it is meaningful only when UTA enables ISOLATED_MARGIN
+    pub auto_add_margin: AutoAddMargin,
+    /// Initial margin
+    /// Classic & UTA1.0(inverse): ignore this field
+    /// UTA portfolio margin mode, it returns ""
+    #[serde(deserialize_with = "number")]
+    pub position_i_m: f64,
+    /// Maintenance margin
+    /// Classic & UTA1.0(inverse): ignore this field
+    /// UTA portfolio margin mode, it returns ""
+    #[serde(deserialize_with = "number")]
+    pub position_m_m: f64,
+    /// Position liquidation price
+    /// UTA1.0(inverse) & UTA(isolated margin enabled) & Classic account: it is the real price for isolated and cross positions, and keeps "" when liqPrice <= minPrice or liqPrice >= maxPrice
+    /// UTA (Cross margin mode): it is an estimated price for cross positions(because the unified mode controls the risk rate according to the account), and keeps "" when liqPrice <= minPrice or liqPrice >= maxPrice
+    /// However, this field is empty for Portfolio Margin Mode, and no liquidation price will be provided
+    #[serde(deserialize_with = "number")]
+    pub liq_price: f64,
+    /// Bankruptcy price
+    /// Unified mode returns "", no position bankruptcy price (except UTA1.0(inverse))
+    #[serde(deserialize_with = "option_number")]
+    pub bust_price: Option<f64>,
+    /// deprecated, meaningless here, always "Full"
+    pub tpsl_mode: TpslMode,
+    /// Take profit price
+    #[serde(deserialize_with = "number")]
+    pub take_profit: f64,
+    /// Stop loss price
+    #[serde(deserialize_with = "number")]
+    pub stop_loss: f64,
+    /// Trailing stop
+    #[serde(deserialize_with = "number")]
+    pub trailing_stop: f64,
+    /// Unrealised profit and loss
+    // #[serde(deserialize_with = "option_number")]
+    // pub unrealized_pnl: Option<f64>,
+    /// The realised PnL for the current holding position
+    #[serde(deserialize_with = "number")]
+    pub cur_realised_pnl: f64,
+    /// USDC contract session avg price, it is the same figure as avg entry price shown in the web UI
+    #[serde(deserialize_with = "number")]
+    pub session_avg_price: f64,
+    /// Delta
+    pub delta: Option<String>,
+    /// Gamma
+    pub gamma: Option<String>,
+    /// Vega
+    pub vega: Option<String>,
+    /// Theta
+    pub theta: Option<String>,
+    /// Cumulative realised pnl
+    /// Futures & Perp: it is the all time cumulative realised P&L
+    /// Option: it is the realised P&L when you hold that position
+    #[serde(deserialize_with = "number")]
+    pub cum_realised_pnl: f64,
+    /// Position status. Normal, Liq, Adl
+    pub position_status: PositionStatus,
+    /// Auto-deleverage rank indicator. What is Auto-Deleveraging?
+    #[serde(deserialize_with = "number")]
+    pub adl_rank_indicator: i64,
+    /// Useful when Bybit lower the risk limit
+    /// true: Only allowed to reduce the position. You can consider a series of measures, e.g., lower the risk limit, decrease leverage or reduce the position, add margin, or cancel orders, after these operations, you can call confirm new risk limit endpoint to check if your position can be removed the reduceOnly mark
+    /// false: There is no restriction, and it means your position is under the risk when the risk limit is systematically adjusted
+    /// Only meaningful for isolated margin & cross margin of USDT Perp, USDC Perp, USDC Futures, Inverse Perp and Inverse Futures, meaningless for others
+    pub is_reduce_only: bool,
+    /// Useful when Bybit lower the risk limit
+    /// When isReduceOnly=true: the timestamp (ms) when the MMR will be forcibly adjusted by the system
+    /// When isReduceOnly=false: the timestamp when the MMR had been adjusted by system
+    /// It returns the timestamp when the system operates, and if you manually operate, there is no timestamp
+    /// Keeps "" by default, if there was a lower risk limit system adjustment previously, it shows that system operation timestamp
+    /// Only meaningful for isolated margin & cross margin of USDT Perp, USDC Perp, USDC Futures, Inverse Perp and Inverse Futures, meaningless for others
+    #[serde(deserialize_with = "option_number")]
+    pub mmr_sys_updated_time: Option<i64>,
+    /// Useful when Bybit lower the risk limit
+    /// When isReduceOnly=true: the timestamp (ms) when the leverage will be forcibly adjusted by the system
+    /// When isReduceOnly=false: the timestamp when the leverage had been adjusted by system
+    /// It returns the timestamp when the system operates, and if you manually operate, there is no timestamp
+    /// Keeps "" by default, if there was a lower risk limit system adjustment previously, it shows that system operation timestamp
+    /// Only meaningful for isolated margin & cross margin of USDT Perp, USDC Perp, USDC Futures, Inverse Perp and Inverse Futures, meaningless for others
+    #[serde(deserialize_with = "option_number")]
+    pub leverage_sys_updated_time: Option<i64>,
+    /// Timestamp of the first time a position was created on this symbol (ms)
+    #[serde(deserialize_with = "number")]
+    pub created_time: i64,
+    /// Position data updated timestamp (ms)
+    #[serde(deserialize_with = "number")]
+    pub updated_time: i64,
+    /// Cross sequence, used to associate each fill and each position update
+    /// Different symbols may have the same seq, please use seq + symbol to check unique
+    /// Returns "-1" if the symbol has never been traded
+    /// Returns the seq updated by the last transaction when there are setting like leverage, risk limit
+    pub seq: i64,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::common::deserialize_slice;
@@ -787,6 +940,102 @@ mod tests {
                 smp_order_id: String::new(),
                 created_time: 1672364262444,
                 updated_time: 1672364262457,
+            }],
+        });
+        assert_eq!(message, expected);
+    }
+
+    #[test]
+    fn deserialize_incoming_message_position() {
+        let json = r#"{
+            "id": "1003076014fb7eedb-c7e6-45d6-a8c1-270f0169171a",
+            "topic": "position",
+            "creationTime": 1697682317044,
+            "data": [
+                {
+                    "positionIdx": 2,
+                    "tradeMode": 0,
+                    "riskId": 1,
+                    "riskLimitValue": "2000000",
+                    "symbol": "BTCUSDT",
+                    "side": "",
+                    "size": "0",
+                    "entryPrice": "0",
+                    "leverage": "10",
+                    "positionValue": "0",
+                    "positionBalance": "0",
+                    "markPrice": "28184.5",
+                    "positionIM": "0",
+                    "positionMM": "0",
+                    "takeProfit": "0",
+                    "stopLoss": "0",
+                    "trailingStop": "0",
+                    "unrealisedPnl": "0",
+                    "curRealisedPnl": "1.26",
+                    "cumRealisedPnl": "-25.06579337",
+                    "sessionAvgPrice": "0",
+                    "createdTime": "1694402496913",
+                    "updatedTime": "1697682317038",
+                    "tpslMode": "Full",
+                    "liqPrice": "0",
+                    "bustPrice": "",
+                    "category": "linear",
+                    "positionStatus": "Normal",
+                    "adlRankIndicator": 0,
+                    "autoAddMargin": 0,
+                    "leverageSysUpdatedTime": "",
+                    "mmrSysUpdatedTime": "",
+                    "seq": 8327597863,
+                    "isReduceOnly": false
+                }
+            ]
+        }"#;
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
+        let expected = IncomingMessage::Position(PositionMsg {
+            id: String::from("1003076014fb7eedb-c7e6-45d6-a8c1-270f0169171a"),
+            topic: String::from("position"),
+            creation_time: 1697682317044,
+            data: vec![PositionUpdateMsg {
+                category: Category::Linear,
+                symbol: String::from("BTCUSDT"),
+                // TODO: write deserializer from ""
+                // side: None,
+                size: 0.0,
+                position_idx: PositionIdx::Sell,
+                trade_mode: TradeMode::CrossMargin,
+                position_value: 0.0,
+                risk_id: 1,
+                risk_limit_value: 2000000.0,
+                entry_price: 0.0,
+                mark_price: 28184.5,
+                leverage: 10.0,
+                position_balance: 0.0,
+                auto_add_margin: AutoAddMargin::False,
+                position_i_m: 0.0,
+                position_m_m: 0.0,
+                liq_price: 0.0,
+                bust_price: None,
+                tpsl_mode: TpslMode::Full,
+                take_profit: 0.0,
+                stop_loss: 0.0,
+                trailing_stop: 0.0,
+                // TODO: write deserializer from undefined
+                // unrealized_pnl: None,
+                cur_realised_pnl: 1.26,
+                session_avg_price: 0.0,
+                delta: None,
+                gamma: None,
+                vega: None,
+                theta: None,
+                cum_realised_pnl: -25.06579337,
+                position_status: PositionStatus::Normal,
+                adl_rank_indicator: 0,
+                is_reduce_only: false,
+                mmr_sys_updated_time: None,
+                leverage_sys_updated_time: None,
+                created_time: 1694402496913,
+                updated_time: 1697682317038,
+                seq: 8327597863,
             }],
         });
         assert_eq!(message, expected);
