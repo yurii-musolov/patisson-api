@@ -478,6 +478,46 @@ pub struct OptionTrade {
     pub iv: f64,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GetOpenClosedOrdersParams {
+    /// Product type
+    /// UTA2.0, UTA1.0: linear, inverse, spot, option
+    /// classic account: linear, inverse, spot
+    category: String,
+    /// Symbol name, like BTCUSDT, uppercase only. For linear, either symbol, baseCoin, settleCoin is required
+    symbol: Option<String>,
+    /// Base coin, uppercase only
+    /// Supports linear, inverse & option
+    /// option: it returns all option open orders by default
+    base_coin: Option<String>,
+    /// Settle coin, uppercase only
+    /// linear: either symbol, baseCoin or settleCoin is required
+    /// spot: not supported
+    /// option: USDT or USDC
+    settle_coin: Option<String>,
+    /// Order ID
+    order_id: Option<String>,
+    /// User customised order ID
+    order_link_id: Option<String>,
+    /// 0(default): UTA2.0, UTA1.0, classic account query open status orders (e.g., New, PartiallyFilled) only
+    /// 1: UTA2.0, UTA1.0(except inverse)
+    /// 2: UTA1.0(inverse), classic account
+    /// Query a maximum of recent 500 closed status records are kept under each account each category (e.g., Cancelled, Rejected, Filled orders).
+    /// If the Bybit service is restarted due to an update, this part of the data will be cleared and accumulated again, but the order records will still be queried in order history
+    /// openOnly param will be ignored when query by orderId or orderLinkId
+    /// Classic spot: not supported
+    open_only: Option<i64>,
+    /// Order: active order, StopOrder: conditional order for Futures and Spot, tpslOrder: spot TP/SL order, OcoOrder: Spot oco order, BidirectionalTpslOrder: Spot bidirectional TPSL order
+    /// classic account spot: return Order active order by default
+    /// Others: all kinds of orders by default
+    order_filter: Option<String>,
+    /// Limit for data size per page. [1, 50]. Default: 20
+    limit: Option<i64>,
+    /// Cursor. Use the nextPageCursor token from the response to retrieve the next page of the result set
+    cursor: Option<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Order {
