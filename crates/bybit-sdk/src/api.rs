@@ -481,70 +481,115 @@ pub struct OptionTrade {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Order {
-    pub order_id: String,       // Order ID
-    pub order_link_id: String,  // User customised order ID
-    pub block_trade_id: String, // Paradigm block trade ID
-    pub symbol: String,         // Symbol name
+    /// Order ID
+    pub order_id: String,
+    /// User customised order ID
+    pub order_link_id: String,
+    /// Paradigm block trade ID
+    pub block_trade_id: String,
+    /// Symbol name
+    pub symbol: String,
+    /// Order price
     #[serde(deserialize_with = "number")]
-    pub price: f64, // Order price
+    pub price: f64,
+    /// Order qty
     #[serde(deserialize_with = "number")]
-    pub qty: f64, // Order qty
-    pub side: Side,             // Side. Buy,Sell
-    pub is_leverage: bool, // Whether to borrow. Unified spot only. 0: false, 1: true. Classic spot is not supported, always 0
-    pub position_idx: PositionIdx, // Position index. Used to identify positions in different position modes.
-    pub order_status: OrderStatus, // Order status
-    pub create_type: Option<CreateType>, // Order create type
-    // Only for category=linear or inverse
-    // Spot, Option do not have this key
-    pub cancel_type: CancelType,     // Cancel type
-    pub reject_reason: RejectReason, // Reject reason. Classic spot is not supported
-    pub avg_price: String,           // Average filled price
-    // UTA: returns "" for those orders without avg price
-    // classic account: returns "0" for those orders without avg price, and also for those orders have partilly filled but cancelled at the end
+    pub qty: f64,
+    /// Side. Buy,Sell
+    pub side: Side,
+    /// Whether to borrow. Unified spot only. 0: false, 1: true. Classic spot is not supported, always 0
+    pub is_leverage: bool,
+    /// Position index. Used to identify positions in different position modes.
+    pub position_idx: PositionIdx,
+    /// Order status
+    pub order_status: OrderStatus,
+    /// Order create type
+    /// Only for category=linear or inverse
+    /// Spot, Option do not have this key
+    pub create_type: Option<CreateType>,
+    /// Cancel type
+    pub cancel_type: CancelType,
+    /// Reject reason. Classic spot is not supported
+    pub reject_reason: RejectReason,
+    /// Average filled price
+    /// UTA: returns "" for those orders without avg price
+    /// classic account: returns "0" for those orders without avg price, and also for those orders have partilly filled but cancelled at the end
+    pub avg_price: String,
+    /// The remaining qty not executed. Classic spot is not supported
     #[serde(deserialize_with = "number")]
-    pub leaves_qty: f64, // The remaining qty not executed. Classic spot is not supported
+    pub leaves_qty: f64,
+    /// The estimated value not executed. Classic spot is not supported
     #[serde(deserialize_with = "number")]
-    pub leaves_value: f64, // The estimated value not executed. Classic spot is not supported
+    pub leaves_value: f64,
+    /// Cumulative executed order qty
     #[serde(deserialize_with = "number")]
-    pub cum_exec_qty: f64, // Cumulative executed order qty
+    pub cum_exec_qty: f64,
+    /// Cumulative executed order value. Classic spot is not supported
     #[serde(deserialize_with = "number")]
-    pub cum_exec_value: f64, // Cumulative executed order value. Classic spot is not supported
+    pub cum_exec_value: f64,
+    /// Cumulative executed trading fee. Classic spot is not supported
     #[serde(deserialize_with = "number")]
-    pub cum_exec_fee: f64, // Cumulative executed trading fee. Classic spot is not supported
-    pub time_in_force: TimeInForce,     // Time in force
-    pub order_type: OrderType, // Order type. Market,Limit. For TP/SL order, it means the order type after triggered
-    pub stop_order_type: StopOrderType, // Stop order type
-    pub order_iv: String,      // Implied volatility
-    pub market_unit: String, // The unit for qty when create Spot market orders for UTA account. baseCoin, quoteCoin
+    pub cum_exec_fee: f64,
+    /// Time in force
+    pub time_in_force: TimeInForce,
+    /// Order type. Market,Limit. For TP/SL order, it means the order type after triggered
+    pub order_type: OrderType,
+    /// Stop order type
+    pub stop_order_type: StopOrderType,
+    /// Implied volatility
+    pub order_iv: String,
+    /// The unit for qty when create Spot market orders for UTA account. baseCoin, quoteCoin
+    pub market_unit: String,
+    /// Trigger price. If stopOrderType=TrailingStop, it is activate price. Otherwise, it is trigger price
     #[serde(deserialize_with = "number")]
-    pub trigger_price: f64, // Trigger price. If stopOrderType=TrailingStop, it is activate price. Otherwise, it is trigger price
+    pub trigger_price: f64,
+    /// Take profit price
     #[serde(deserialize_with = "number")]
-    pub take_profit: f64, // Take profit price
+    pub take_profit: f64,
+    /// Stop loss price
     #[serde(deserialize_with = "number")]
-    pub stop_loss: f64, // Stop loss price
-    pub tpsl_mode: Option<TpslMode>, // TP/SL mode, Full: entire position for TP/SL. Partial: partial position tp/sl. Spot does not have this field, and Option returns always ""
-    pub oco_trigger_by: OcoTriggerBy, // The trigger type of Spot OCO order.OcoTriggerByUnknown, OcoTriggerByTp, OcoTriggerByBySl. Classic spot is not supported
+    pub stop_loss: f64,
+    /// TP/SL mode, Full: entire position for TP/SL. Partial: partial position tp/sl. Spot does not have this field, and Option returns always ""
+    pub tpsl_mode: Option<TpslMode>,
+    /// The trigger type of Spot OCO order.OcoTriggerByUnknown, OcoTriggerByTp, OcoTriggerByBySl. Classic spot is not supported
+    pub oco_trigger_by: OcoTriggerBy,
+    /// The limit order price when take profit price is triggered
     #[serde(deserialize_with = "number")]
-    pub tp_limit_price: f64, // The limit order price when take profit price is triggered
+    pub tp_limit_price: f64,
+    /// The limit order price when stop loss price is triggered
     #[serde(deserialize_with = "number")]
-    pub sl_limit_price: f64, // The limit order price when stop loss price is triggered
-    pub tp_trigger_by: TriggerBy,     // The price type to trigger take profit
-    pub sl_trigger_by: TriggerBy,     // The price type to trigger stop loss
-    pub trigger_direction: TriggerDirection, // Trigger direction. 1: rise, 2: fall
-    pub trigger_by: TriggerBy,        // The price type of trigger price
+    pub sl_limit_price: f64,
+    /// The price type to trigger take profit
+    pub tp_trigger_by: TriggerBy,
+    /// The price type to trigger stop loss
+    pub sl_trigger_by: TriggerBy,
+    /// Trigger direction. 1: rise, 2: fall
+    pub trigger_direction: TriggerDirection,
+    /// The price type of trigger price
+    pub trigger_by: TriggerBy,
+    /// Last price when place the order, Spot is not applicable
     #[serde(deserialize_with = "number")]
-    pub last_price_on_created: f64, // Last price when place the order, Spot is not applicable
+    pub last_price_on_created: f64,
+    /// Last price when place the order, Spot has this field only
     #[serde(deserialize_with = "number")]
-    pub base_price: f64, // Last price when place the order, Spot has this field only
-    pub reduce_only: bool,            // Reduce only. true means reduce position size
-    pub close_on_trigger: bool,       // Close on trigger. What is a close on trigger order?
-    pub place_type: PlaceType,        // Place type, option used. iv, price
-    pub smp_type: SmpType,            // SMP execution type
+    pub base_price: f64,
+    /// Reduce only. true means reduce position size
+    pub reduce_only: bool,
+    /// Close on trigger.
+    pub close_on_trigger: bool,
+    /// Place type, option used. iv, price
+    pub place_type: PlaceType,
+    /// SMP execution type
+    pub smp_type: SmpType,
+    /// Smp group ID. If the UID has no group, it is 0 by default
     #[serde(deserialize_with = "number")]
-    pub smp_group: i64, // Smp group ID. If the UID has no group, it is 0 by default
-    pub smp_order_id: String, // The counterparty's orderID which triggers this SMP execution
-    pub created_time: String, // Order created timestamp (ms)
-    pub updated_time: String, // Order updated timestamp (ms)
+    pub smp_group: i64,
+    /// The counterparty's orderID which triggers this SMP execution
+    pub smp_order_id: String,
+    /// Order created timestamp (ms)
+    pub created_time: String,
+    /// Order updated timestamp (ms)
+    pub updated_time: String,
 }
 
 impl Order {

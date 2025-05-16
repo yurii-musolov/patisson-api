@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_repr::*;
 use std::fmt;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -65,7 +66,7 @@ pub enum AnnouncementType {
 
 // Unified Account: spot | linear | inverse | option
 // Classic Account: linear | inverse | spot
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(PartialEq, Debug, Deserialize, Serialize, Clone)]
 pub enum Category {
     #[serde(rename = "inverse")]
     Inverse, // Inverse contract, including Inverse perp, Inverse futures.
@@ -203,6 +204,11 @@ pub enum StopOrderType {
     OcoOrder,               // spot Oco order
     MmRateClose,            // On web or app can set MMR to close position
     BidirectionalTpslOrder, // Spot bidirectional tpsl order
+    /// As Option::None
+    /// Deprecated!
+    /// TODO: write deserializer from ""
+    #[serde(rename = "")]
+    None,
 }
 
 #[derive(Debug, PartialEq, Deserialize)]
@@ -280,14 +286,15 @@ pub enum IntervalTime {
     Day1,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize_repr, Deserialize_repr, Debug, PartialEq)]
+#[repr(u8)]
 pub enum PositionIdx {
-    #[serde(rename = "0")]
-    OneWay, // 0:one-way mode position
-    #[serde(rename = "1")]
-    Buy, // 1:Buy side of hedge-mode position
-    #[serde(rename = "2")]
-    Sell, // 2:Sell side of hedge-mode position
+    /// 0:one-way mode position
+    OneWay = 0,
+    /// 1:Buy side of hedge-mode position
+    Buy = 1,
+    /// 2:Sell side of hedge-mode position
+    Sell = 2,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -463,6 +470,11 @@ pub enum TriggerBy {
     LastPrice,
     IndexPrice,
     MarkPrice,
+    /// As Option::None
+    /// Deprecated!
+    /// TODO: write deserializer from ""
+    #[serde(rename = "")]
+    None,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -485,6 +497,7 @@ pub enum CancelType {
     CancelByCrossSelfMuch,
     CancelByCrossReachMaxTradeNum,
     CancelByDCP,
+    UNKNOWN,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -823,6 +836,11 @@ pub enum SmpType {
 pub enum TpslMode {
     Full,
     Partial,
+    /// As Option::None
+    /// Deprecated!
+    /// TODO: write deserializer from ""
+    #[serde(rename = "")]
+    None,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -835,12 +853,12 @@ pub enum OcoTriggerBy {
     BySl,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize_repr, Deserialize_repr, Debug, PartialEq)]
+#[repr(u8)]
 pub enum TriggerDirection {
-    #[serde(rename = "1")]
-    Rise,
-    #[serde(rename = "2")]
-    Fall,
+    UNKNOWN = 0,
+    Rise = 1,
+    Fall = 2,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -872,4 +890,11 @@ pub enum Pair {
     // example of BTCUSDT
     Base,  // BTC
     Quote, // USDT
+}
+
+#[derive(Debug, Deserialize, PartialEq)]
+pub enum SlippageToleranceType {
+    TickSize,
+    Percent,
+    UNKNOWN, // default
 }

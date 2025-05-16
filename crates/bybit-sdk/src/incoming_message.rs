@@ -4,7 +4,11 @@ use serde_aux::prelude::{
     deserialize_option_number_from_string as option_number,
 };
 
-use crate::{Interval, Side, TickDirection};
+use crate::{
+    CancelType, Category, CreateType, Interval, OcoTriggerBy, OrderStatus, OrderType, PlaceType,
+    PositionIdx, RejectReason, Side, SlippageToleranceType, SmpType, StopOrderType, TickDirection,
+    TimeInForce, TpslMode, TriggerBy, TriggerDirection,
+};
 
 #[derive(PartialEq, Deserialize, Debug)]
 #[serde(untagged)]
@@ -14,6 +18,7 @@ pub enum IncomingMessage {
     Trade(TradeMsg),
     KLine(KLineMsg),
     AllLiquidation(AllLiquidationMsg),
+    Order(OrderMsg),
 }
 
 #[derive(PartialEq, Deserialize, Debug)]
@@ -290,6 +295,150 @@ pub struct AllLiquidationSnapshotMsg {
     pub price: f64,
 }
 
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(tag = "topic")]
+pub enum OrderMsg {
+    #[serde(rename = "order", rename_all = "camelCase")]
+    Update {
+        id: String,
+        creation_time: u64,
+        data: Vec<OrderUpdateMsg>,
+    },
+}
+
+#[derive(PartialEq, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct OrderUpdateMsg {
+    /// Product type
+    /// UTA2.0, UTA1.0: spot, linear, inverse, option
+    /// Classic account: spot, linear, inverse.
+    pub category: Category,
+    /// Order ID
+    pub order_id: String,
+    /// User customized order ID
+    pub order_link_id: Option<String>,
+    /// Whether to borrow.
+    /// Unified spot only. 0: false, 1: true.
+    /// Classic spot is not supported, always 0
+    pub is_leverage: Option<bool>,
+    /// Block trade ID
+    pub block_trade_id: Option<String>,
+    /// Symbol name
+    pub symbol: String,
+    /// Order price
+    #[serde(deserialize_with = "number")]
+    pub price: f64,
+    /// Order qty
+    #[serde(deserialize_with = "number")]
+    pub qty: f64,
+    /// Side. Buy,Sell
+    pub side: Side,
+    /// Position index. Used to identify positions in different position modes.
+    pub position_idx: PositionIdx,
+    /// Order create type
+    /// Only for category=linear or inverse
+    /// Spot, Option do not have this key
+    pub create_type: Option<CreateType>,
+    /// Order status
+    pub order_status: OrderStatus,
+    /// Cancel type
+    pub cancel_type: CancelType,
+    /// Reject reason. Classic spot is not supported
+    pub reject_reason: RejectReason,
+    /// Average filled price
+    /// returns "" for those orders without avg price, and also for those classic account orders have partilly filled but cancelled at the end
+    /// Classic Spot: not supported, always ""
+    #[serde(deserialize_with = "number")]
+    pub avg_price: f64,
+    /// The remaining qty not executed. Classic spot is not supported
+    #[serde(deserialize_with = "option_number")]
+    pub leaves_qty: Option<f64>,
+    /// The estimated value not executed. Classic spot is not supported
+    #[serde(deserialize_with = "option_number")]
+    pub leaves_value: Option<f64>,
+    /// Cumulative executed order qty
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_qty: f64,
+    /// Cumulative executed order value.
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_value: f64,
+    /// Cumulative executed trading fee.
+    /// Classic spot: it is the latest execution fee for order.
+    /// After upgraded to the Unified account, you can use execFee for each fill in Execution topic
+    #[serde(deserialize_with = "number")]
+    pub cum_exec_fee: f64,
+    /// Closed profit and loss for each close position order. The figure is the same as "closedPnl" from Get Closed PnL
+    #[serde(deserialize_with = "number")]
+    pub closed_pnl: f64,
+    /// Trading fee currency for Spot only. Please understand Spot trading fee currency here
+    #[serde(deserialize_with = "option_number")]
+    pub fee_currency: Option<f64>,
+    /// Time in force
+    pub time_in_force: TimeInForce,
+    /// Order type. Market,Limit. For TP/SL order, it means the order type after triggered
+    pub order_type: OrderType,
+    /// Stop order type
+    pub stop_order_type: StopOrderType,
+    /// The trigger type of Spot OCO order.OcoTriggerByUnknown, OcoTriggerByTp, OcoTriggerByBySl. Classic spot is not supported
+    pub oco_trigger_by: Option<OcoTriggerBy>,
+    /// Implied volatility
+    #[serde(deserialize_with = "option_number")]
+    pub order_iv: Option<f64>,
+    /// The unit for qty when create Spot market orders for UTA account. baseCoin, quoteCoin
+    pub market_unit: Option<String>,
+    /// Spot and Futures market order slippage tolerance type TickSize, Percent, UNKNOWN(default)
+    pub slippage_tolerance_type: Option<SlippageToleranceType>,
+    /// Slippage tolerance value
+    pub slippage_tolerance: Option<String>, // TODO: parse Option<f64> from "{}"
+    /// Trigger price. If stopOrderType=TrailingStop, it is activate price. Otherwise, it is trigger price
+    #[serde(deserialize_with = "option_number")]
+    pub trigger_price: Option<f64>,
+    /// Take profit price
+    #[serde(deserialize_with = "option_number")]
+    pub take_profit: Option<f64>,
+    /// Stop loss price
+    #[serde(deserialize_with = "option_number")]
+    pub stop_loss: Option<f64>,
+    /// TP/SL mode, Full: entire position for TP/SL. Partial: partial position tp/sl. Spot does not have this field, and Option returns always ""
+    pub tpsl_mode: TpslMode,
+    /// The limit order price when take profit price is triggered
+    #[serde(deserialize_with = "option_number")]
+    pub tp_limit_price: Option<f64>,
+    /// The limit order price when stop loss price is triggered
+    #[serde(deserialize_with = "option_number")]
+    pub sl_limit_price: Option<f64>,
+    /// The price type to trigger take profit
+    pub tp_trigger_by: Option<TriggerBy>,
+    /// The price type to trigger stop loss
+    pub sl_trigger_by: Option<TriggerBy>,
+    /// Trigger direction. 1: rise, 2: fall
+    pub trigger_direction: TriggerDirection,
+    /// The price type of trigger price
+    pub trigger_by: Option<TriggerBy>,
+    /// Last price when place the order, Spot is not applicable
+    #[serde(deserialize_with = "option_number")]
+    pub last_price_on_created: Option<f64>,
+    /// Reduce only. true means reduce position size
+    pub reduce_only: bool,
+    /// Close on trigger.
+    pub close_on_trigger: bool,
+    /// Place type, option used. iv, price
+    pub place_type: PlaceType,
+    /// SMP execution type
+    pub smp_type: SmpType,
+    /// Smp group ID. If the UID has no group, it is 0 by default
+    #[serde(deserialize_with = "number")]
+    pub smp_group: i64,
+    /// The counterparty's orderID which triggers this SMP execution
+    pub smp_order_id: String,
+    /// Order created timestamp (ms)
+    #[serde(deserialize_with = "number")]
+    pub created_time: u64,
+    /// Order updated timestamp (ms)
+    #[serde(deserialize_with = "number")]
+    pub updated_time: u64,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::common::deserialize_slice;
@@ -525,6 +674,119 @@ mod tests {
                 side: Side::Buy,
                 size: 0.001,
                 price: 85823.60,
+            }],
+        });
+        assert_eq!(message, expected);
+    }
+
+    #[test]
+    fn deserialize_incoming_message_order() {
+        let json = r#"{
+            "id": "5923240c6880ab-c59f-420b-9adb-3639adc9dd90",
+            "topic": "order",
+            "creationTime": 1672364262474,
+            "data": [
+                {
+                    "symbol": "ETH-30DEC22-1400-C",
+                    "orderId": "5cf98598-39a7-459e-97bf-76ca765ee020",
+                    "side": "Sell",
+                    "orderType": "Market",
+                    "cancelType": "UNKNOWN",
+                    "price": "72.5",
+                    "qty": "1",
+                    "orderIv": "",
+                    "timeInForce": "IOC",
+                    "orderStatus": "Filled",
+                    "orderLinkId": "",
+                    "lastPriceOnCreated": "",
+                    "reduceOnly": false,
+                    "leavesQty": "",
+                    "leavesValue": "",
+                    "cumExecQty": "1",
+                    "cumExecValue": "75",
+                    "avgPrice": "75",
+                    "blockTradeId": "",
+                    "positionIdx": 0,
+                    "cumExecFee": "0.358635",
+                    "closedPnl": "0",
+                    "createdTime": "1672364262444",
+                    "updatedTime": "1672364262457",
+                    "rejectReason": "EC_NoError",
+                    "stopOrderType": "",
+                    "tpslMode": "",
+                    "triggerPrice": "",
+                    "takeProfit": "",
+                    "stopLoss": "",
+                    "tpTriggerBy": "",
+                    "slTriggerBy": "",
+                    "tpLimitPrice": "",
+                    "slLimitPrice": "",
+                    "triggerDirection": 0,
+                    "triggerBy": "",
+                    "closeOnTrigger": false,
+                    "category": "option",
+                    "placeType": "price",
+                    "smpType": "None",
+                    "smpGroup": 0,
+                    "smpOrderId": "",
+                    "feeCurrency": ""
+                }
+            ]
+        }"#;
+        let message: IncomingMessage = deserialize_slice(json.as_bytes()).unwrap();
+        let expected = IncomingMessage::Order(OrderMsg::Update {
+            id: String::from("5923240c6880ab-c59f-420b-9adb-3639adc9dd90"),
+            creation_time: 1672364262474,
+            data: vec![OrderUpdateMsg {
+                category: Category::Option,
+                order_id: String::from("5cf98598-39a7-459e-97bf-76ca765ee020"),
+                order_link_id: Some(String::new()),
+                is_leverage: None,
+                block_trade_id: Some(String::new()),
+                symbol: String::from("ETH-30DEC22-1400-C"),
+                price: 72.5,
+                qty: 1.0,
+                side: Side::Sell,
+                position_idx: PositionIdx::OneWay,
+                order_status: OrderStatus::Filled,
+                create_type: None,
+                cancel_type: CancelType::UNKNOWN,
+                reject_reason: RejectReason::EcNoError,
+                avg_price: 75.0,
+                leaves_qty: None,
+                leaves_value: None,
+                cum_exec_qty: 1.0,
+                cum_exec_value: 75.0,
+                cum_exec_fee: 0.358635,
+                closed_pnl: 0.0,
+                fee_currency: None,
+                time_in_force: TimeInForce::IOC,
+                order_type: OrderType::Market,
+                stop_order_type: StopOrderType::None,
+                oco_trigger_by: None,
+                order_iv: None,
+                market_unit: None,
+                slippage_tolerance_type: None,
+                slippage_tolerance: None,
+                trigger_price: None,
+                take_profit: None,
+                stop_loss: None,
+                tpsl_mode: TpslMode::None,
+                tp_limit_price: None,
+                sl_limit_price: None,
+                tp_trigger_by: Some(TriggerBy::None),
+                sl_trigger_by: Some(TriggerBy::None),
+                trigger_direction: TriggerDirection::UNKNOWN,
+                trigger_by: Some(TriggerBy::None),
+                last_price_on_created: None,
+                reduce_only: false,
+                close_on_trigger: false,
+                place_type: PlaceType::Price,
+                smp_type: SmpType::None,
+                smp_group: 0,
+                smp_order_id: String::new(),
+                created_time: 1672364262444,
+                updated_time: 1672364262457,
             }],
         });
         assert_eq!(message, expected);
