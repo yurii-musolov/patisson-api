@@ -809,22 +809,6 @@ pub enum VipLevel {
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub enum AdlRankIndicator {
-    #[serde(rename = "0")]
-    Zero, // default value of empty position
-    #[serde(rename = "1")]
-    One,
-    #[serde(rename = "2")]
-    Two,
-    #[serde(rename = "3")]
-    Three,
-    #[serde(rename = "4")]
-    Four,
-    #[serde(rename = "5")]
-    Five,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum SmpType {
     None, // default
     CancelMaker,
@@ -897,4 +881,18 @@ pub enum SlippageToleranceType {
     TickSize,
     Percent,
     UNKNOWN, // default
+}
+
+#[derive(Serialize_repr, Deserialize_repr, Debug, PartialEq)]
+#[repr(u8)]
+pub enum TradeMode {
+    CrossMargin = 0,
+    IsolatedMargin = 1,
+}
+
+#[derive(Serialize_repr, Deserialize_repr, Debug, PartialEq)]
+#[repr(u8)]
+pub enum AutoAddMargin {
+    False = 0,
+    True = 1,
 }
