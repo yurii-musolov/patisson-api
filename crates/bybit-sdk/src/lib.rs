@@ -1,5 +1,4 @@
 mod api;
-mod client;
 mod common;
 mod enums;
 mod incoming_message;
@@ -9,7 +8,6 @@ mod topic;
 mod url;
 
 pub use api::*;
-pub use client::*;
 pub use enums::*;
 pub use incoming_message::*;
 pub use outgoing_message::*;

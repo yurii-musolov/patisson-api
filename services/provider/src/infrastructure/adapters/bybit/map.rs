@@ -1,6 +1,6 @@
-use bybit_sdk::{
+use bybit::v5::{
     self, Category, InverseLinearSpotTrade, KLineRow, LinearInverseTicker, OptionTicker,
-    OptionTrade, Side as BybitSide, SpotTicker,
+    OptionTrade, SpotTicker,
 };
 
 use crate::application::{Candle, Interval, Schema, Side, Symbol, Trade};
@@ -72,10 +72,10 @@ pub fn from_option_trade(v: &OptionTrade) -> Trade {
     }
 }
 
-pub fn from_side(v: &BybitSide) -> Side {
+pub fn from_side(v: &v5::Side) -> Side {
     match v {
-        BybitSide::Buy => Side::Buy,
-        BybitSide::Sell => Side::Sell,
+        v5::Side::Buy => Side::Buy,
+        v5::Side::Sell => Side::Sell,
     }
 }
 
@@ -88,20 +88,20 @@ pub fn to_category(m: &Schema) -> Category {
     }
 }
 
-pub fn to_interval(m: &Interval) -> bybit_sdk::Interval {
+pub fn to_interval(m: &Interval) -> v5::Interval {
     match m {
-        Interval::Minute1 => bybit_sdk::Interval::Minute1,
-        Interval::Minute3 => bybit_sdk::Interval::Minute3,
-        Interval::Minute5 => bybit_sdk::Interval::Minute5,
-        Interval::Minute15 => bybit_sdk::Interval::Minute15,
-        Interval::Minute30 => bybit_sdk::Interval::Minute30,
-        Interval::Hour1 => bybit_sdk::Interval::Minute60,
-        Interval::Hour2 => bybit_sdk::Interval::Minute120,
-        Interval::Hour4 => bybit_sdk::Interval::Minute240,
-        Interval::Hour6 => bybit_sdk::Interval::Minute360,
-        Interval::Hour12 => bybit_sdk::Interval::Minute720,
-        Interval::Day1 => bybit_sdk::Interval::Day,
-        Interval::Week1 => bybit_sdk::Interval::Week,
-        Interval::Month1 => bybit_sdk::Interval::Month,
+        Interval::Minute1 => v5::Interval::Minute1,
+        Interval::Minute3 => v5::Interval::Minute3,
+        Interval::Minute5 => v5::Interval::Minute5,
+        Interval::Minute15 => v5::Interval::Minute15,
+        Interval::Minute30 => v5::Interval::Minute30,
+        Interval::Hour1 => v5::Interval::Hour1,
+        Interval::Hour2 => v5::Interval::Hour2,
+        Interval::Hour4 => v5::Interval::Hour4,
+        Interval::Hour6 => v5::Interval::Hour6,
+        Interval::Hour12 => v5::Interval::Hour12,
+        Interval::Day1 => v5::Interval::Day1,
+        Interval::Week1 => v5::Interval::Week1,
+        Interval::Month1 => v5::Interval::Month1,
     }
 }

@@ -13,13 +13,14 @@ axum = { version = "=0.8.4", features = ["macros", "ws"] }
 axum-extra = { version = "=0.10.1", features = ["typed-header"] }
 chrono = "=0.4.41"
 clap = { version = "=4.5.38", features = ["derive", "env"] }
-criterion = "=0.5.1"
+criterion = "=0.6.0"
 futures = "=0.3.31"
 futures-util = { version = "=0.3", default-features = false, features = [
     "sink",
     "std",
 ] }
 jsonwebtoken = "=9.3.1"
+patisson-bybit-sdk = "=0.1.2"
 reqwest = { version = "=0.12.15", features = ["json"] }
 serde = { version = "=1.0.219", features = ["derive"] }
 serde-aux = "=4.7.0"

@@ -8,6 +8,7 @@ use axum::{
     routing::{any, get},
     Router,
 };
+use bybit::v5::BASE_URL_API_MAINNET_1;
 use clap::Parser;
 use std::sync::Arc;
 use tower_http::{
@@ -15,8 +16,6 @@ use tower_http::{
     trace::{DefaultMakeSpan, TraceLayer},
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
-use bybit_sdk::{Client as BybitClient, URL_BASE_API_MAINNET_1};
 
 use application::Application;
 use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
@@ -45,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
 async fn command_serve(args: Serve) -> anyhow::Result<()> {
     tracing::info!("CLI command: Serve, args: {:?}", args);
 
-    let client_bybit = BybitClient::new(URL_BASE_API_MAINNET_1.to_string());
+    let client_bybit = bybit::v5::Client::new(BASE_URL_API_MAINNET_1);
 
     let binance = BinanceExchange::new();
     let bingx = BingXExchange::new();

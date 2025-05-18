@@ -22,6 +22,7 @@ TODO:
 - [x] Containerization (Docker).
 - [x] Application-level tracing.
 - [x] Use CI/CD (GitHub Actions).
+- [x] Use SDKs for exchanges from crates.io.
 - [ ] Time series database (Prometheus).
 - [ ] Monitoring system (Grafana).
 - [ ] Logging.

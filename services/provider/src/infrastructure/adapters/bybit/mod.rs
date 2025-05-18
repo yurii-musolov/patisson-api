@@ -1,11 +1,9 @@
 mod map;
 
+use bybit::v5::{self, Client, GetKLinesParams, GetTickersParams, KLine, Ticker};
+
 use crate::application::{
     Candle, Exchanger, GetCandlesParams, GetTradesParams, Schema, Symbol, Trade,
-};
-use bybit_sdk::{
-    self, Client, GetKLinesParams, GetTickersParams, GetTradesParams as BybitGetTradesParams,
-    KLine, Ticker, Trade as BybitTrade,
 };
 use map::{
     from_inverse_linear_spot_trade, from_kline_row, from_linear_inverse_ticker, from_option_ticker,
@@ -35,7 +33,7 @@ impl Exchanger for BybitExchange {
             .await;
 
         match result {
-            Ok(response) => match response.result {
+            Ok(response) => match response {
                 Ticker::Inverse { list } => list.iter().map(from_linear_inverse_ticker).collect(),
                 Ticker::Linear { list } => list.iter().map(from_linear_inverse_ticker).collect(),
                 Ticker::Option { list } => list.iter().map(from_option_ticker).collect(),
@@ -62,7 +60,7 @@ impl Exchanger for BybitExchange {
             .await;
 
         match result {
-            Ok(response) => match response.result {
+            Ok(response) => match response {
                 KLine::Inverse { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
                 KLine::Linear { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
                 KLine::Option { list, symbol: _ } => list.iter().map(from_kline_row).collect(),
@@ -78,7 +76,7 @@ impl Exchanger for BybitExchange {
     async fn get_trades(&self, schema: Schema, params: GetTradesParams) -> Vec<Trade> {
         let result = self
             .client
-            .get_public_recent_trading_history(BybitGetTradesParams {
+            .get_public_recent_trading_history(v5::GetTradesParams {
                 category: to_category(&schema),
                 symbol: Some(params.symbol),
                 base_coin: None,
@@ -88,15 +86,15 @@ impl Exchanger for BybitExchange {
             .await;
 
         match result {
-            Ok(response) => match response.result {
-                BybitTrade::Inverse { list } => {
+            Ok(response) => match response {
+                v5::Trade::Inverse { list } => {
                     list.iter().map(from_inverse_linear_spot_trade).collect()
                 }
-                BybitTrade::Linear { list } => {
+                v5::Trade::Linear { list } => {
                     list.iter().map(from_inverse_linear_spot_trade).collect()
                 }
-                BybitTrade::Option { list } => list.iter().map(from_option_trade).collect(),
-                BybitTrade::Spot { list } => {
+                v5::Trade::Option { list } => list.iter().map(from_option_trade).collect(),
+                v5::Trade::Spot { list } => {
                     list.iter().map(from_inverse_linear_spot_trade).collect()
                 }
             },
