@@ -6,32 +6,20 @@ use crate::application::{Price, Size, Timestamp, Volume};
 pub enum APIExchange {
     #[serde(rename = "binance")]
     Binance,
-    #[serde(rename = "bingx")]
-    BingX,
     #[serde(rename = "bybit")]
     Bybit,
-    #[serde(rename = "kraken")]
-    Kraken,
-    #[serde(rename = "mexc")]
-    Mexc,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum APISchema {
-    #[serde(rename = "futures")]
-    Futures,
     #[serde(rename = "futures_coin")]
     FuturesCoin,
-    #[serde(rename = "futures_standard")]
-    FuturesStandard,
     #[serde(rename = "futures_usdt")]
     FuturesUSDT,
     #[serde(rename = "inverse")]
     Inverse,
     #[serde(rename = "linear")]
     Linear,
-    #[serde(rename = "margin")]
-    Margin,
     #[serde(rename = "spot")]
     Spot,
 }
@@ -39,14 +27,10 @@ pub enum APISchema {
 impl APISchema {
     pub fn is_valid_with(&self, exchange: &APIExchange) -> bool {
         match exchange {
-            APIExchange::Binance => matches!(
-                self,
-                Self::FuturesCoin | Self::FuturesUSDT | Self::Margin | Self::Spot
-            ),
-            APIExchange::BingX => false,
+            APIExchange::Binance => {
+                matches!(self, Self::FuturesCoin | Self::FuturesUSDT | Self::Spot)
+            }
             APIExchange::Bybit => matches!(self, Self::Inverse | Self::Linear | Self::Spot),
-            APIExchange::Kraken => false,
-            APIExchange::Mexc => false,
         }
     }
 }
@@ -165,10 +149,7 @@ mod tests {
     fn serialize_api_exchange() {
         let cases = vec![
             (APIExchange::Binance, "\"binance\""),
-            (APIExchange::BingX, "\"bingx\""),
             (APIExchange::Bybit, "\"bybit\""),
-            (APIExchange::Kraken, "\"kraken\""),
-            (APIExchange::Mexc, "\"mexc\""),
         ];
 
         cases.iter().for_each(|(value, expected)| {
@@ -181,10 +162,7 @@ mod tests {
     fn deserialize_api_exchange() {
         let cases = vec![
             ("\"binance\"", APIExchange::Binance),
-            ("\"bingx\"", APIExchange::BingX),
             ("\"bybit\"", APIExchange::Bybit),
-            ("\"kraken\"", APIExchange::Kraken),
-            ("\"mexc\"", APIExchange::Mexc),
         ];
 
         cases.iter().for_each(|(value, expected)| {
@@ -196,13 +174,10 @@ mod tests {
     #[test]
     fn serialize_api_schema() {
         let cases = vec![
-            (APISchema::Futures, "\"futures\""),
             (APISchema::FuturesCoin, "\"futures_coin\""),
-            (APISchema::FuturesStandard, "\"futures_standard\""),
             (APISchema::FuturesUSDT, "\"futures_usdt\""),
             (APISchema::Inverse, "\"inverse\""),
             (APISchema::Linear, "\"linear\""),
-            (APISchema::Margin, "\"margin\""),
             (APISchema::Spot, "\"spot\""),
         ];
 
@@ -215,13 +190,10 @@ mod tests {
     #[test]
     fn deserialize_api_schema() {
         let cases = vec![
-            ("\"futures\"", APISchema::Futures),
             ("\"futures_coin\"", APISchema::FuturesCoin),
-            ("\"futures_standard\"", APISchema::FuturesStandard),
             ("\"futures_usdt\"", APISchema::FuturesUSDT),
             ("\"inverse\"", APISchema::Inverse),
             ("\"linear\"", APISchema::Linear),
-            ("\"margin\"", APISchema::Margin),
             ("\"spot\"", APISchema::Spot),
         ];
 

@@ -18,10 +18,10 @@ use tower_http::{
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use application::Application;
-use infrastructure::{BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange};
+use infrastructure::{BinanceExchange, BybitExchange};
 use presentation::{get_candles, get_symbols, get_trades, websocket_handler, Command, Serve};
 
-type App = Application<BinanceExchange, BingXExchange, BybitExchange, KrakenExchange, MEXCExchange>;
+type App = Application<BinanceExchange, BybitExchange>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -47,12 +47,9 @@ async fn command_serve(args: Serve) -> anyhow::Result<()> {
     let client_bybit = bybit::v5::Client::new(BASE_URL_API_MAINNET_1);
 
     let binance = BinanceExchange::new();
-    let bingx = BingXExchange::new();
     let bybit = BybitExchange::new(client_bybit);
-    let kraken = KrakenExchange::new();
-    let mexc = MEXCExchange::new();
 
-    let application = Application::new(binance, bingx, bybit, kraken, mexc);
+    let application = Application::new(binance, bybit);
     let application = Arc::new(application);
 
     let v1 = Router::new()

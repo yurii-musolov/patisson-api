@@ -42,47 +42,29 @@ pub trait IApp {
     ) -> Vec<Trade>;
 }
 
-pub struct Application<E1, E2, E3, E4, E5>
+pub struct Application<E1, E2>
 where
     E1: Exchanger,
     E2: Exchanger,
-    E3: Exchanger,
-    E4: Exchanger,
-    E5: Exchanger,
 {
     binance: E1,
-    bingx: E2,
-    bybit: E3,
-    kraken: E4,
-    mexc: E5,
+    bybit: E2,
 }
 
-impl<E1, E2, E3, E4, E5> Application<E1, E2, E3, E4, E5>
+impl<E1, E2> Application<E1, E2>
 where
     E1: Exchanger,
     E2: Exchanger,
-    E3: Exchanger,
-    E4: Exchanger,
-    E5: Exchanger,
 {
-    pub fn new(binance: E1, bingx: E2, bybit: E3, kraken: E4, mexc: E5) -> Self {
-        Self {
-            binance,
-            bingx,
-            bybit,
-            kraken,
-            mexc,
-        }
+    pub fn new(binance: E1, bybit: E2) -> Self {
+        Self { binance, bybit }
     }
 }
 
-impl<E1, E2, E3, E4, E5> IApp for Application<E1, E2, E3, E4, E5>
+impl<E1, E2> IApp for Application<E1, E2>
 where
     E1: Exchanger,
     E2: Exchanger,
-    E3: Exchanger,
-    E4: Exchanger,
-    E5: Exchanger,
 {
     fn connect(
         &self,
@@ -105,10 +87,7 @@ where
     ) -> Vec<Symbol> {
         match exchange {
             Exchange::Binance => self.binance.get_symbols(schema, symbol).await,
-            Exchange::BingX => self.bingx.get_symbols(schema, symbol).await,
             Exchange::Bybit => self.bybit.get_symbols(schema, symbol).await,
-            Exchange::Kraken => self.kraken.get_symbols(schema, symbol).await,
-            Exchange::Mexc => self.mexc.get_symbols(schema, symbol).await,
         }
     }
 
@@ -120,10 +99,7 @@ where
     ) -> Vec<Candle> {
         match exchange {
             Exchange::Binance => self.binance.get_candles(schema, params).await,
-            Exchange::BingX => self.bingx.get_candles(schema, params).await,
             Exchange::Bybit => self.bybit.get_candles(schema, params).await,
-            Exchange::Kraken => self.kraken.get_candles(schema, params).await,
-            Exchange::Mexc => self.mexc.get_candles(schema, params).await,
         }
     }
 
@@ -135,10 +111,7 @@ where
     ) -> Vec<Trade> {
         match exchange {
             Exchange::Binance => self.binance.get_trades(schema, params).await,
-            Exchange::BingX => self.bingx.get_trades(schema, params).await,
             Exchange::Bybit => self.bybit.get_trades(schema, params).await,
-            Exchange::Kraken => self.kraken.get_trades(schema, params).await,
-            Exchange::Mexc => self.mexc.get_trades(schema, params).await,
         }
     }
 }

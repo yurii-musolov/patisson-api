@@ -4,22 +4,16 @@ use crate::application::{Candle, Exchange, Interval, Schema, Side, Symbol, Trade
 pub fn from_api_exchange(v: &APIExchange) -> Exchange {
     match v {
         APIExchange::Binance => Exchange::Binance,
-        APIExchange::BingX => Exchange::BingX,
         APIExchange::Bybit => Exchange::Bybit,
-        APIExchange::Kraken => Exchange::Kraken,
-        APIExchange::Mexc => Exchange::Mexc,
     }
 }
 
 pub fn from_api_schema(v: &APISchema) -> Schema {
     match v {
-        APISchema::Futures => Schema::Futures,
         APISchema::FuturesCoin => Schema::FuturesCoin,
-        APISchema::FuturesStandard => Schema::FuturesStandard,
         APISchema::FuturesUSDT => Schema::FuturesUSDT,
         APISchema::Inverse => Schema::Inverse,
         APISchema::Linear => Schema::Linear,
-        APISchema::Margin => Schema::Margin,
         APISchema::Spot => Schema::Spot,
     }
 }

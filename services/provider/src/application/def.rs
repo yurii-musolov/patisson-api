@@ -6,20 +6,14 @@ pub type Volume = f64;
 #[derive(Clone)]
 pub enum Exchange {
     Binance,
-    BingX,
     Bybit,
-    Kraken,
-    Mexc,
 }
 #[derive(Clone)]
 pub enum Schema {
-    Futures,
     FuturesCoin,
-    FuturesStandard,
     FuturesUSDT,
     Inverse,
     Linear,
-    Margin,
     Spot,
 }
 
