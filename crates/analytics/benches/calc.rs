@@ -1,5 +1,7 @@
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
+
 use analytics::{calc_f64, calc_i32};
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn calc_benchmark(c: &mut Criterion) {
     c.bench_function("calc_i32", |b| {
